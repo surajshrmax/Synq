@@ -1,0 +1,15 @@
+import 'package:synq/core/network/api_result.dart';
+import 'package:synq/features/auth/data/models/user_model.dart';
+import 'package:synq/features/conversation/data/data_source/remote/user_api_service.dart';
+import 'package:synq/features/conversation/domain/repository/user_repository.dart';
+
+class UserRepositoryImpl implements UserRepository {
+  final UserApiService apiService;
+
+  UserRepositoryImpl({required this.apiService});
+
+  @override
+  Future<ApiResult<Iterable<UserModel>>> searchUser(String name) async {
+    return await apiService.searchUser(name);
+  }
+}
