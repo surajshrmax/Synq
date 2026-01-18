@@ -4,6 +4,8 @@ abstract class SearchUserState {}
 
 class SearchUserInitialState extends SearchUserState {}
 
+class SearchUserLoadingState extends SearchUserState {}
+
 class SearchUserFoundState extends SearchUserState {
   final Iterable<User> users;
 

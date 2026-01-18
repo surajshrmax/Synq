@@ -13,7 +13,7 @@ import 'package:synq/features/conversation/data/data_source/remote/user_api_serv
 import 'package:synq/features/conversation/data/repository/user_repository_impl.dart';
 import 'package:synq/features/conversation/domain/repository/user_repository.dart';
 import 'package:synq/features/conversation/domain/usecases/search_user_use_case.dart';
-import 'package:synq/features/conversation/presentation/bloc/search_user_bloc.dart';
+import 'package:synq/features/conversation/presentation/bloc/search/search_user_bloc.dart';
 
 final getIt = GetIt.instance;
 

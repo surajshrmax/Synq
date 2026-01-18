@@ -5,3 +5,9 @@ class StartSearchUserEvent extends SearchUserEvent {
 
   StartSearchUserEvent({required this.name});
 }
+
+class ExecuteSearchEvent extends SearchUserEvent {
+  final String name;
+
+  ExecuteSearchEvent({required this.name});
+}

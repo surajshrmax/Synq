@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
-// ignore: unused_import
-import 'package:synq/config/theme/app_theme.dart';
-import 'package:synq/features/conversation/presentation/pages/find_user_page.dart';
+import 'package:synq/core/widgets/synq_container.dart';
 import 'package:synq/system_bars_wrapper.dart';
 
 class ConversationPage extends StatelessWidget {
@@ -35,17 +34,20 @@ class ConversationPage extends StatelessWidget {
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.w500),
                 ),
 
-                SizedBox(
-                  height: 60.h,
-                  width: 60.h,
-                  child: CircleAvatar(
-                    backgroundColor: textTheme?.secondaryTextColor,
-                    child: Text(
-                      "S",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
+                GestureDetector(
+                  onTap: () => context.push("/message/null"),
+                  child: SizedBox(
+                    height: 60.h,
+                    width: 60.h,
+                    child: CircleAvatar(
+                      backgroundColor: textTheme?.secondaryTextColor,
+                      child: Text(
+                        "S",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
@@ -55,42 +57,32 @@ class ConversationPage extends StatelessWidget {
           ),
           SizedBox(height: 10.h),
 
-          GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => FindUserPage()),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.r),
-              child: Container(
-                height: 50.h,
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 10.r),
-                decoration: BoxDecoration(
-                  border: Border.all(width: 2, color: theme.dividerColor),
+          SynqContainer(
+            onPressed: () => context.push("/search"),
+            height: 50.h,
+            margin: EdgeInsets.symmetric(horizontal: 10.r),
+            padding: EdgeInsets.symmetric(horizontal: 10.r),
+            child: Row(
+              spacing: 20,
+              children: [
+                Icon(
+                  Icons.search,
+                  size: 25.sp,
+                  color: textTheme?.secondaryTextColor,
                 ),
-
-                child: Row(
-                  spacing: 20,
-                  children: [
-                    Icon(
-                      Icons.search,
-                      size: 25.sp,
-                      color: textTheme?.secondaryTextColor,
-                    ),
-                    Text(
-                      'Find Friends...',
-                      style: TextStyle(
-                        color: textTheme?.secondaryTextColor,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 18.sp,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Find Friends...',
+                  style: TextStyle(
+                    color: textTheme?.secondaryTextColor,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 18.sp,
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
+
+          SizedBox(height: 20.h),
         ],
       ),
     );

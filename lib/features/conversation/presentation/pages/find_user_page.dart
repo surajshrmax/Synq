@@ -1,13 +1,13 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:synq/core/widgets/synq_container.dart';
 import 'package:synq/core/widgets/synq_icon_button.dart';
-import 'package:synq/features/conversation/presentation/bloc/search_user_bloc.dart';
-import 'package:synq/features/conversation/presentation/bloc/search_user_event.dart';
-import 'package:synq/features/conversation/presentation/bloc/search_user_state.dart';
+import 'package:synq/features/conversation/presentation/bloc/search/search_user_bloc.dart';
+import 'package:synq/features/conversation/presentation/bloc/search/search_user_event.dart';
+import 'package:synq/features/conversation/presentation/bloc/search/search_user_state.dart';
+import 'package:synq/features/conversation/presentation/pages/message_page.dart';
 import 'package:synq/features/conversation/presentation/widgets/conversation_list_item.dart';
 import 'package:synq/system_bars_wrapper.dart';
 
@@ -19,17 +19,6 @@ class FindUserPage extends StatelessWidget {
     final theme = Theme.of(context);
     final mediaQuery = MediaQuery.of(context);
     final TextEditingController searchController = TextEditingController();
-    Timer? timer;
-
-    Future<void> searchUser(String value) async {
-      timer?.cancel();
-      timer = Timer(
-        Duration(seconds: 2),
-        () => context.read<SearchUserBloc>().add(
-          StartSearchUserEvent(name: value),
-        ),
-      );
-    }
 
     return SystemBarsWrapper(
       child: Scaffold(
@@ -51,27 +40,48 @@ class FindUserPage extends StatelessWidget {
                       SizedBox(height: 20.h),
                       SynqIconButton(
                         icon: Icons.chevron_left,
-                        onPressed: () {},
+                        onPressed: () => context.pop(),
                       ),
                       SizedBox(height: 20.h),
                       SynqContainer(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.all(10.r),
-                            border: InputBorder.none,
-                            hintText: "Find Friends...",
-                            hintStyle: TextStyle(fontSize: 22.sp),
-                          ),
-                          style: TextStyle(fontSize: 22.sp),
+                        height: 50.h,
+                        child: Center(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(10.r),
+                              border: InputBorder.none,
+                              hintText: "Find Friends...",
+                              hintStyle: TextStyle(fontSize: 18.sp),
 
-                          onChanged: (value) => searchUser(value),
+                              prefixIcon: Icon(Icons.search),
+                            ),
+                            style: TextStyle(fontSize: 18.sp),
+
+                            onChanged: (value) => context
+                                .read<SearchUserBloc>()
+                                .add(StartSearchUserEvent(name: value)),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-              SliverToBoxAdapter(child: Divider(color: theme.dividerColor)),
+              SliverToBoxAdapter(
+                child: BlocBuilder<SearchUserBloc, SearchUserState>(
+                  builder: (context, state) {
+                    return state is SearchUserLoadingState
+                        ? SizedBox(
+                            height: 5,
+                            child: LinearProgressIndicator(
+                              backgroundColor: theme.scaffoldBackgroundColor,
+                              color: Colors.lightGreenAccent,
+                            ),
+                          )
+                        : Divider(color: theme.dividerColor);
+                  },
+                ),
+              ),
 
               // SizedBox(height: 20.h),
               BlocBuilder<SearchUserBloc, SearchUserState>(
@@ -94,6 +104,7 @@ class FindUserPage extends StatelessWidget {
                       itemBuilder: (context, index) {
                         var user = state.users.elementAt(index);
                         return ConversationListItem(
+                          onPressed: () => context.go("/message/${user.id}"),
                           title: user.name,
                           subtitle: user.userName,
                           isVerified: user.isVerified,

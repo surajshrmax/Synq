@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:synq/config/routes.dart';
 import 'package:synq/config/theme/app_theme.dart';
 import 'package:synq/core/di/service_locator.dart';
 import 'package:synq/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:synq/features/conversation/presentation/bloc/search_user_bloc.dart';
-import 'package:synq/splash_screen.dart';
+import 'package:synq/features/conversation/presentation/bloc/search/search_user_bloc.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,12 +32,12 @@ class MainApp extends StatelessWidget {
               create: (_) => getIt<SearchUserBloc>(),
             ),
           ],
-          child: MaterialApp(
+          child: MaterialApp.router(
             debugShowCheckedModeBanner: false,
             theme: lightThemeData,
             darkTheme: darkThemeData,
             themeMode: ThemeMode.system,
-            home: SplashScreen(),
+            routerConfig: routes,
           ),
         );
       },
