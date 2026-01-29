@@ -14,6 +14,7 @@ class SynqContainer extends StatelessWidget {
   final bool shadow;
   final Color? backgroundColor;
   final Color? shadowColor;
+  final Color? borderColor;
   const SynqContainer({
     super.key,
     required this.child,
@@ -27,6 +28,7 @@ class SynqContainer extends StatelessWidget {
     this.shadow = false,
     this.backgroundColor,
     this.shadowColor,
+    this.borderColor,
   });
 
   @override
@@ -44,7 +46,10 @@ class SynqContainer extends StatelessWidget {
           color: backgroundColor ?? theme.scaffoldBackgroundColor,
           borderRadius:
               borderRadius ?? BorderRadius.circular(defaultBorderRadiusValue),
-          border: Border.all(width: 2, color: theme.dividerColor),
+          border: Border.all(
+            width: 2,
+            color: borderColor ?? theme.dividerColor,
+          ),
           boxShadow: shadow
               ? [
                   BoxShadow(

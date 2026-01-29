@@ -1,31 +1,21 @@
-import 'package:synq/features/auth/data/models/user_model.dart';
-
 class LoginResponse {
-  final UserModel? user;
-  final AuthToken? token;
+  final String userId;
+  final AuthToken token;
 
-  LoginResponse({required this.user, required this.token});
+  LoginResponse({required this.userId, required this.token});
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
-    user: UserModel.fromJson(json['user']),
-    token: AuthToken.fromJson(json['token']),
+    userId: json['userId'],
+    token: AuthToken(
+      accessToken: json['accessToken'],
+      refreshTokne: json['refreshToken'],
+    ),
   );
 }
 
 class AuthToken {
-  final String? id;
-  final String? accessToken;
-  final String? refreshTokne;
+  final String accessToken;
+  final String refreshTokne;
 
-  AuthToken({
-    required this.id,
-    required this.accessToken,
-    required this.refreshTokne,
-  });
-
-  factory AuthToken.fromJson(Map<String, dynamic> json) => AuthToken(
-    id: json['id'],
-    accessToken: json['accessToken'],
-    refreshTokne: json['refreshToken'],
-  );
+  AuthToken({required this.accessToken, required this.refreshTokne});
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/core/widgets/bottom_sheet_dialog.dart';
 import 'package:synq/core/widgets/synq_button.dart';
@@ -9,7 +10,6 @@ import 'package:synq/core/widgets/synq_text_field.dart';
 import 'package:synq/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:synq/features/auth/presentation/bloc/auth_event.dart';
 import 'package:synq/features/auth/presentation/bloc/auth_state.dart';
-import 'package:synq/features/auth/presentation/widgets/login_fab_button.dart';
 import 'package:synq/features/auth/presentation/widgets/login_textfield.dart';
 import 'package:synq/features/conversation/presentation/pages/conversation_page.dart';
 import 'package:synq/system_bars_wrapper.dart';
@@ -29,14 +29,12 @@ class RegisterPage extends StatelessWidget {
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (previous, current) =>
           current is AuthSuccess ||
-          current is AuthError && current.source == ErrorSource.register,
+          current is AuthError && current.source == Source.register,
       listener: (context, state) {
         if (state is AuthError) {
           showErrorDialog(context, state.errorMessage);
         } else if (state is AuthSuccess) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => ConversationPage()),
-          );
+          context.go("/home");
         }
       },
       child: SystemBarsWrapper(
@@ -98,9 +96,13 @@ class RegisterPage extends StatelessWidget {
 
                   SizedBox(height: 30.h),
                   BlocBuilder<AuthBloc, AuthState>(
+                    buildWhen: (previous, current) =>
+                        current is AuthRegisterLoading ||
+                        current is AuthError &&
+                            current.source == Source.register,
                     builder: (context, state) {
                       return SynqButton(
-                        showLoading: state is AuthLoading,
+                        showLoading: state is AuthRegisterLoading,
                         title: 'Continue',
                         onPressed: () {
                           context.read<AuthBloc>().add(

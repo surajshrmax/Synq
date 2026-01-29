@@ -1,17 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
+import 'package:synq/core/di/service_locator.dart';
+import 'package:synq/core/storage/secure_storage.dart';
 import 'package:synq/core/widgets/synq_container.dart';
+import 'package:synq/features/conversation/presentation/bloc/conversation/conversation_bloc.dart';
+import 'package:synq/features/conversation/presentation/bloc/conversation/conversation_event.dart';
+import 'package:synq/features/conversation/presentation/bloc/conversation/conversation_state.dart';
+import 'package:synq/features/conversation/presentation/widgets/conversation_list_item.dart';
 import 'package:synq/system_bars_wrapper.dart';
 
-class ConversationPage extends StatelessWidget {
-  const ConversationPage({super.key});
+class ConversationPage extends StatefulWidget {
+  final storage = getIt<SecureStorage>();
+  ConversationPage({super.key});
+
+  @override
+  State<ConversationPage> createState() => _ConversationPageState();
+}
+
+class _ConversationPageState extends State<ConversationPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ConversationBloc>().add(LoadAllConversationEvent());
+  }
+
   @override
   Widget build(BuildContext context) {
     return SystemBarsWrapper(
-      child: Scaffold(body: Column(children: [_buildHeader(context)])),
+      child: Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(child: _buildHeader(context)),
+
+            BlocBuilder<ConversationBloc, ConversationState>(
+              builder: (context, state) {
+                return state is ConversationStateLoaded
+                    ? SliverList.builder(
+                        itemCount: state.conversations.length,
+                        itemBuilder: (context, index) {
+                          var conversation = state.conversations[index];
+                          var user = conversation.user;
+                          var lastMessage = conversation.lastMessage;
+                          return ConversationListItem(
+                            onPressed: () => context.push(
+                              "/message/${conversation.id}/${user?.id}",
+                            ),
+                            title: user!.profile!.name,
+                            subtitle:
+                                "${conversation.id == lastMessage!.senderId ? "You: " : ""}${lastMessage.content}",
+                            date: "${lastMessage.sendAt.day.toString()} Jan",
+                            unreads: 1,
+                          );
+                        },
+                      )
+                    : SliverFillRemaining(
+                        child: Center(child: Text("No Conversation Found")),
+                      );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -35,7 +88,10 @@ class ConversationPage extends StatelessWidget {
                 ),
 
                 GestureDetector(
-                  onTap: () => context.push("/message/null"),
+                  onTap: () async {
+                    await widget.storage.deleteAllTokens();
+                    context.go("/auth/login");
+                  },
                   child: SizedBox(
                     height: 60.h,
                     width: 60.h,
@@ -83,6 +139,14 @@ class ConversationPage extends StatelessWidget {
           ),
 
           SizedBox(height: 20.h),
+
+          // TextButton(
+          //   onPressed: () async {
+          //     var storage = getIt<SecureStorage>();
+          //     await storage.deleteAllTokens();
+          //   },
+          //   child: Text("Logout"),
+          // ),
         ],
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/core/widgets/synq_button.dart';
 import 'package:synq/features/auth/presentation/pages/login_page.dart';
@@ -38,6 +39,10 @@ class _WelcomePageState extends State<WelcomePage>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SystemBarsWrapper(
+      statusBarColor: lightBackgroundColor,
+      navigtaionBarColor: lightBackgroundColor,
+      statusBarIconBrightness: Brightness.dark,
+      navigationBarIconBrightness: Brightness.dark,
       child: Scaffold(
         backgroundColor: lightBackgroundColor,
         body: Padding(
@@ -70,7 +75,7 @@ class _WelcomePageState extends State<WelcomePage>
                     child: SvgPicture.asset(
                       "assets/images/group.svg",
                       fit: BoxFit.fitHeight,
-                      color: Colors.black,
+                      // color: Colors.black,
                     ),
                   ),
                 ),
@@ -81,12 +86,7 @@ class _WelcomePageState extends State<WelcomePage>
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: SynqButton(
                   title: 'Continue',
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => LoginPage()),
-                    );
-                  },
+                  onPressed: () => context.go("/auth/login"),
                 ),
               ),
               SizedBox(height: MediaQuery.of(context).padding.bottom),

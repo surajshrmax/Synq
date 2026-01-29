@@ -1,15 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/core/widgets/synq_animated_container.dart';
 import 'package:synq/core/widgets/synq_icon_button.dart';
+import 'package:synq/features/auth/data/models/user_model.dart';
+import 'package:synq/features/conversation/data/data_source/remote/message_api_service.dart';
+import 'package:synq/features/conversation/presentation/bloc/message/message_bloc.dart';
+import 'package:synq/features/conversation/presentation/bloc/message/message_event.dart';
+import 'package:synq/features/conversation/presentation/bloc/message/message_state.dart';
+import 'package:synq/features/conversation/presentation/bloc/user/user_bloc.dart';
+import 'package:synq/features/conversation/presentation/bloc/user/user_event.dart';
+import 'package:synq/features/conversation/presentation/bloc/user/user_state.dart';
 import 'package:synq/features/conversation/presentation/widgets/message_box.dart';
 import 'package:synq/features/conversation/presentation/widgets/message_list_item.dart';
 import 'package:synq/system_bars_wrapper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class MessagePage extends StatelessWidget {
+class MessagePage extends StatefulWidget {
+  final String conversationId;
   final String userID;
-  const MessagePage({super.key, required this.userID});
+
+  final TextEditingController messageController = TextEditingController();
+  MessagePage({super.key, required this.conversationId, required this.userID});
+
+  @override
+  State<MessagePage> createState() => _MessagePageState();
+}
+
+class _MessagePageState extends State<MessagePage> {
+  @override
+  void initState() {
+    context.read<UserBloc>().add(GetUserInfoEvent(userId: widget.userID));
+    context.read<MessageBloc>().add(
+      GetAllMessageEvent(conversationId: widget.conversationId),
+    );
+
+    context.read<MessageBloc>().add(StartListeningMessageEvent());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,40 +50,43 @@ class MessagePage extends StatelessWidget {
           children: [
             _buildHeader(mediaQuery, theme, textTheme),
             Expanded(
-              child: ListView.builder(
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return MessageListItem(
-                    name: 'Suraj',
-                    message: 'Hello',
-                    imageUrl: '',
-                    time: 'Today at 1:21 PM',
-                  );
+              child: BlocBuilder<MessageBloc, MessageState>(
+                builder: (context, state) {
+                  return state is MessageStateLoaded
+                      ? ListView.builder(
+                          itemCount: state.messages.length,
+                          itemBuilder: (context, index) {
+                            var message = state.messages[index];
+                            return MessageListItem(
+                              name: "Cat",
+                              message: message.content,
+                              imageUrl: '',
+                              time: 'Today at 1:21 PM',
+                            );
+                          },
+                        )
+                      : Center(child: Text("No Messages"));
                 },
               ),
             ),
 
-            userID == "null"
-                ? SynqAnimatedContainer(
-                    height: 60,
-                    borderRadius: BorderRadius.circular(50),
-                    shadowOffSet: Offset.zero,
-                    backgroundColor: Colors.lightGreenAccent,
-                    margin: EdgeInsets.only(
-                      left: 10,
-                      right: 10,
-                      bottom: mediaQuery.padding.bottom + 10,
-                    ),
-                    child: Text(
-                      "Add to conversation",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  )
-                : MessageBox(),
+            MessageBox(
+              onSendButtonPressed: () {
+                bool isConversationId = !widget.conversationId.contains("null");
+                context.read<MessageBloc>().add(
+                  SendMessageEvent(
+                    id: isConversationId
+                        ? widget.conversationId
+                        : widget.userID,
+                    type: isConversationId ? IdType.conversation : IdType.user,
+                    content: widget.messageController.text,
+                  ),
+                );
+                widget.messageController.text = "";
+              },
+              onPickButtonPressed: () {},
+              messageBoxController: widget.messageController,
+            ),
           ],
         ),
       ),
@@ -88,12 +119,18 @@ class MessagePage extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    userID!,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  BlocBuilder<UserBloc, UserState>(
+                    builder: (context, state) {
+                      return Text(
+                        state is UserStateInfoLoaded
+                            ? state.user.profile!.name
+                            : "",
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      );
+                    },
                   ),
                   Text(
                     'last seen at 7:49 PM',

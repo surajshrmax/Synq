@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/core/widgets/bottom_sheet_dialog.dart';
 import 'package:synq/core/widgets/synq_button.dart';
@@ -26,14 +27,12 @@ class LoginPage extends StatelessWidget {
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (previous, current) =>
           current is AuthSuccess ||
-          current is AuthError && current.source == ErrorSource.login,
+          current is AuthError && current.source == Source.login,
       listener: (context, state) {
         if (state is AuthError) {
           showErrorDialog(context, state.errorMessage);
         } else if (state is AuthSuccess) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => ConversationPage()),
-          );
+          context.go("/home");
         }
       },
       child: SystemBarsWrapper(
@@ -81,6 +80,7 @@ class LoginPage extends StatelessWidget {
                   RichText(
                     text: TextSpan(
                       text: "New here? ",
+                      style: TextStyle(color: textTheme?.primaryTextColor),
                       children: [
                         TextSpan(
                           text: "Create New Account",
@@ -100,9 +100,12 @@ class LoginPage extends StatelessWidget {
 
                   SizedBox(height: 40.h),
                   BlocBuilder<AuthBloc, AuthState>(
+                    buildWhen: (previous, current) =>
+                        current is AuthLoginLoading ||
+                        current is AuthError && current.source == Source.login,
                     builder: (context, state) {
                       return SynqButton(
-                        showLoading: state is AuthLoading,
+                        showLoading: state is AuthLoginLoading,
                         title: 'Continue',
                         onPressed: () {
                           context.read<AuthBloc>().add(

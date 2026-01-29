@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:synq/config/constants.dart';
 
 class SynqButton extends StatefulWidget {
   final String title;
@@ -18,7 +19,7 @@ class SynqButton extends StatefulWidget {
 }
 
 class _SynqButtonState extends State<SynqButton> {
-  Offset offset = Offset(6, 6);
+  Offset offset = Offset(defaultOffsetValue, defaultOffsetValue);
   bool pressed = false;
 
   @override
@@ -36,8 +37,8 @@ class _SynqButtonState extends State<SynqButton> {
       child: AnimatedContainer(
         duration: Duration(milliseconds: 120),
         transform: Matrix4.translationValues(
-          pressed ? 6 : 0,
-          pressed ? 6 : 0,
+          pressed ? defaultOffsetValue : 0,
+          pressed ? defaultOffsetValue : 0,
           0,
         ),
         height: 60.h,
@@ -45,10 +46,11 @@ class _SynqButtonState extends State<SynqButton> {
         decoration: BoxDecoration(
           color: Colors.lightGreenAccent,
           border: Border.all(color: Colors.grey.shade800, width: 2),
+          borderRadius: BorderRadius.circular(defaultBorderRadiusValue),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.shade800,
-              offset: pressed ? Offset(0, 0) : offset,
+              offset: pressed ? Offset.zero : offset,
             ),
           ],
         ),
@@ -57,9 +59,15 @@ class _SynqButtonState extends State<SynqButton> {
             ? Center(
                 child: SizedBox(
                   height: 60.h,
-                  child: LinearProgressIndicator(
-                    color: Colors.orange,
-                    backgroundColor: Colors.lightGreenAccent,
+                  child: ClipRRect(
+                    borderRadius: BorderRadiusGeometry.circular(
+                      defaultBorderRadiusValue,
+                    ),
+                    child: LinearProgressIndicator(
+                      color: Colors.orange,
+                      backgroundColor: Colors.lightGreenAccent,
+                      stopIndicatorRadius: defaultBorderRadiusValue,
+                    ),
                   ),
                 ),
               )

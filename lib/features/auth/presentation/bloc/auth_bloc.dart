@@ -17,7 +17,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLoginEvent(LoginEvent event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
+    emit(AuthLoginLoading());
     var response = await loginUseCase.call(
       LoginParams(email: event.email, password: event.password),
     );
@@ -27,10 +27,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         break;
       case ApiFailure():
         emit(
-          AuthError(
-            errorMessage: response.error.message,
-            source: ErrorSource.login,
-          ),
+          AuthError(errorMessage: response.error.message, source: Source.login),
         );
         break;
     }
@@ -40,7 +37,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     RegisterEvent event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthLoading());
+    emit(AuthRegisterLoading());
     var response = await registerUseCase.call(
       RegisterParams(
         name: event.name,
@@ -52,9 +49,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     response.when(
       success: (data) => emit(AuthSuccess()),
-      failure: (error) => emit(
-        AuthError(errorMessage: error.message, source: ErrorSource.register),
-      ),
+      failure: (error) =>
+          emit(AuthError(errorMessage: error.message, source: Source.register)),
     );
   }
 }

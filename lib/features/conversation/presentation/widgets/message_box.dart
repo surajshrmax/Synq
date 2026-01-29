@@ -4,7 +4,15 @@ import 'package:synq/core/widgets/synq_container.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MessageBox extends StatefulWidget {
-  const MessageBox({super.key});
+  final VoidCallback onSendButtonPressed;
+  final VoidCallback onPickButtonPressed;
+  final TextEditingController messageBoxController;
+  const MessageBox({
+    super.key,
+    required this.onSendButtonPressed,
+    required this.onPickButtonPressed,
+    required this.messageBoxController,
+  });
 
   @override
   State<MessageBox> createState() => _MessageBoxState();
@@ -12,9 +20,6 @@ class MessageBox extends StatefulWidget {
 
 class _MessageBoxState extends State<MessageBox> {
   bool isTextBoxEmpty = true;
-
-  TextEditingController messageBoxController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -44,8 +49,8 @@ class _MessageBoxState extends State<MessageBox> {
             duration: Duration(milliseconds: 200),
             child: isTextBoxEmpty
                 ? SynqAnimatedContainer(
-                    height: 40.h,
-                    width: 40.h,
+                    height: 50.h,
+                    width: 50.h,
                     shadowOffSet: Offset(1, 1),
                     onPressed: () {},
                     borderRadius: BorderRadius.circular(30),
@@ -62,8 +67,8 @@ class _MessageBoxState extends State<MessageBox> {
                 hintText: 'Type Message Here...',
               ),
               keyboardType: TextInputType.multiline,
-              controller: messageBoxController,
-              onChanged: (value) => messageBoxController.text.isNotEmpty
+              controller: widget.messageBoxController,
+              onChanged: (value) => widget.messageBoxController.text.isNotEmpty
                   ? updateState(false)
                   : updateState(true),
             ),
@@ -76,7 +81,7 @@ class _MessageBoxState extends State<MessageBox> {
               child: isTextBoxEmpty
                   ? SizedBox.shrink()
                   : SynqAnimatedContainer(
-                      onPressed: () {},
+                      onPressed: () => widget.onSendButtonPressed(),
                       backgroundColor: Colors.lightGreenAccent,
                       shadowOffSet: Offset.zero,
                       borderRadius: BorderRadius.circular(40),

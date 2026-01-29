@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:synq/core/di/service_locator.dart';
 import 'package:synq/core/storage/secure_storage.dart';
-import 'package:synq/features/auth/presentation/pages/welcome_page.dart';
-import 'package:synq/features/conversation/presentation/pages/conversation_page.dart';
 import 'package:synq/system_bars_wrapper.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -39,17 +38,9 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(Duration(seconds: 2), () async {
       var token = await storage.getAccessToken();
       if (token != null && token.isNotEmpty) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (BuildContext context) => ConversationPage(),
-          ),
-        );
+        context.go("/home");
       } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (BuildContext context) => WelcomePage()),
-        );
+        context.go("/welcome");
       }
     });
   }

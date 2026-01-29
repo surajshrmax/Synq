@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:synq/config/constants.dart';
 
 class SynqTextField extends StatefulWidget {
   final String hintText;
@@ -41,17 +42,25 @@ class _SynqTextFieldState extends State<SynqTextField> {
     final theme = Theme.of(context);
     return AnimatedContainer(
       duration: Duration(milliseconds: 120),
-      transform: Matrix4.translationValues(focused ? 4 : 0, focused ? 4 : 0, 0),
+      transform: Matrix4.translationValues(
+        focused ? defaultOffsetValue : 0,
+        focused ? defaultOffsetValue : 0,
+        0,
+      ),
       height: 60.h,
       padding: EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         border: Border.all(width: 2, color: theme.dividerColor),
+        borderRadius: BorderRadius.circular(defaultBorderRadiusValue),
 
         boxShadow: [
           BoxShadow(
             color: theme.dividerColor,
-            offset: Offset(focused ? 0 : 6, focused ? 0 : 6),
+            offset: Offset(
+              focused ? 0 : defaultOffsetValue,
+              focused ? 0 : defaultOffsetValue,
+            ),
           ),
         ],
       ),

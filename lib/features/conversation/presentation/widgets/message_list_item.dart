@@ -42,7 +42,7 @@ class MessageListItem extends StatelessWidget {
                   spacing: 5,
                   children: [
                     Text(
-                      "Exception",
+                      name,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -51,7 +51,7 @@ class MessageListItem extends StatelessWidget {
                     ),
                     Icon(Icons.verified, size: 15, color: Colors.amber),
                     Text(
-                      "at 7:11 PM",
+                      time,
                       style: TextStyle(
                         fontSize: 10,
                         color: textTheme?.secondaryTextColor,
@@ -59,10 +59,7 @@ class MessageListItem extends StatelessWidget {
                     ),
                   ],
                 ),
-                Text(
-                  "Jyada se jyada home me warning dikha do dyamic, kabhi error aaye to kah do under maintainance, update ho jaye tab hata do",
-                  style: TextStyle(fontSize: 16),
-                ),
+                Text(message, style: TextStyle(fontSize: 16)),
               ],
             ),
           ),

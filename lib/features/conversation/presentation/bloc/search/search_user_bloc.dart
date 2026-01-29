@@ -42,11 +42,11 @@ class SearchUserBloc extends Bloc<SearchUserEvent, SearchUserState> {
                   .map(
                     (e) => User(
                       id: e.id,
-                      name: e.name,
+                      name: e.profile!.name,
                       userName: e.userName,
                       email: e.email,
-                      imageUrl: e.imageUrl,
-                      isVerified: e.isVerified,
+                      imageUrl: e.profile!.imageUrl,
+                      isVerified: false,
                     ),
                   )
                   .toList(),

@@ -7,7 +7,6 @@ import 'package:synq/core/widgets/synq_icon_button.dart';
 import 'package:synq/features/conversation/presentation/bloc/search/search_user_bloc.dart';
 import 'package:synq/features/conversation/presentation/bloc/search/search_user_event.dart';
 import 'package:synq/features/conversation/presentation/bloc/search/search_user_state.dart';
-import 'package:synq/features/conversation/presentation/pages/message_page.dart';
 import 'package:synq/features/conversation/presentation/widgets/conversation_list_item.dart';
 import 'package:synq/system_bars_wrapper.dart';
 

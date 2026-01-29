@@ -16,7 +16,9 @@ class DioFactory {
     );
 
     dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
-    dio.interceptors.add(AuthInterceptor(storage: getIt<SecureStorage>()));
+    dio.interceptors.add(
+      AuthInterceptor(storage: getIt<SecureStorage>(), dio: dio),
+    );
 
     return dio;
   }

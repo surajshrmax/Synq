@@ -9,6 +9,11 @@ class UserRepositoryImpl implements UserRepository {
   UserRepositoryImpl({required this.apiService});
 
   @override
+  Future<ApiResult<UserModel>> getUserInfo(String userId) async {
+    return await apiService.getUser(userId);
+  }
+
+  @override
   Future<ApiResult<Iterable<UserModel>>> searchUser(String name) async {
     return await apiService.searchUser(name);
   }

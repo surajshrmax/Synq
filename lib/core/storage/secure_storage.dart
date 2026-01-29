@@ -11,7 +11,6 @@ class SecureStorage {
   SecureStorage(this._storage);
 
   Future<void> saveToken(AuthToken token) async {
-    await _storage.write(key: _id, value: token.id);
     await _storage.write(key: _accessTokenKey, value: token.accessToken);
     await _storage.write(key: _refreshTokenkey, value: token.refreshTokne);
   }

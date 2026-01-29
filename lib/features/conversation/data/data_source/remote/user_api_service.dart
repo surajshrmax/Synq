@@ -7,8 +7,20 @@ class UserApiService {
 
   UserApiService({required this.client});
 
+  Future<ApiResult<UserModel>> getUser(String userId) async {
+    var response = await client.get(
+      "/users/$userId",
+      mapper: (json) => UserModel.fromJson(json),
+    );
+
+    return response.when(
+      success: (data) => ApiSuccess(data: data),
+      failure: (error) => ApiFailure(error: error),
+    );
+  }
+
   Future<ApiResult<Iterable<UserModel>>> searchUser(String name) async {
-    var response = await client.get<List<dynamic>>("/user/search/$name");
+    var response = await client.get<List<dynamic>>("/users/search/$name");
 
     return response.when(
       success: (data) {
