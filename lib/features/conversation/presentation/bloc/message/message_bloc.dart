@@ -14,34 +14,42 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   final GetAllMessagesUseCase getAllMessagesUseCase;
   final SendMessageUseCase sendMessageUseCase;
   final MessageConnection connection;
-  late final StreamSubscription<MessageModel> _subscription;
+
+  final List<StreamSubscription> _subs = [];
+
   List<MessageModel> _messages = [];
   MessageBloc({
     required this.getAllMessagesUseCase,
     required this.sendMessageUseCase,
     required this.connection,
   }) : super(MessageStateInitial()) {
-    _subscription = connection.messages.listen((message) {
-      add(MessageRecievedEvent(message: message));
-    });
+    _subs.add(connection.messages.listen((msg) => onNewMessage(msg)));
+    _subs.add(connection.deletes.listen((id) => onMessageDeletes(id)));
 
     on<GetAllMessageEvent>(_onGetAllMessagesEvent);
     on<SendMessageEvent>(_sendMessageEvent);
     on<StartListeningMessageEvent>(_startMessageConnection);
     on<MessageRecievedEvent>(_onMessageRecieved);
+    on<DeleteMessage>(_onDeleteMessage);
+    on<MessageDeleteEvent>(_onMessageDeleteEvent);
   }
 
   Future<void> _onGetAllMessagesEvent(
     GetAllMessageEvent event,
     Emitter<MessageState> emit,
   ) async {
+    print("LOADED MESSAGES");
     emit(MessageStateLoading());
-    var response = await getAllMessagesUseCase.call(event.conversationId);
+    var response = await getAllMessagesUseCase.call(
+      event.conversationId,
+      event.isConversationId,
+      "null"
+    );
 
     response.when(
       success: (data) {
-        _messages = data;
-        emit(MessageStateLoaded(messages: data));
+        _messages = data.messages;
+        emit(MessageStateLoaded(messages: data.messages));
       },
       failure: (error) {},
     );
@@ -51,26 +59,61 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     SendMessageEvent event,
     Emitter<MessageState> emit,
   ) async {
-    emit(MessageStateSending());
-
+    print("SENT MESSAGE TO CONNECTION");
     await connection.sendMessage(event.id, event.type, event.content);
+  }
+
+  Future<void> _onDeleteMessage(
+    DeleteMessage event,
+    Emitter<MessageState> state,
+  ) async {
+    print("DELETING MESSAGE ${event.id}");
+    await connection.deleteMessage(event.id);
+  }
+
+  Future<void> _onMessageDeleteEvent(
+    MessageDeleteEvent event,
+    Emitter<MessageState> emit,
+  ) async {
+    print("INSIDE BLOC DELETING MESSAGE");
+    _messages.removeWhere((m) => m.id == event.id);
+    emit(MessageStateLoaded(messages: _messages));
   }
 
   Future<void> _onMessageRecieved(
     MessageRecievedEvent event,
     Emitter<MessageState> emit,
   ) async {
+    print("INSIDE BLOC HITTING ON_MESSAGE_RECIEVED");
+    emit(
+      MessageStateLoaded(
+        messages: List<MessageModel>.from(_messages)..add(event.message),
+      ),
+    );
     _messages.add(event.message);
-    emit(MessageStateLoaded(messages: List.from(_messages)));
   }
 
   Future<void> _startMessageConnection(
     StartListeningMessageEvent event,
     Emitter<MessageState> emit,
   ) async {
+    print("STARTING NEW SIGNAL_R CONNECTION");
     var token = getIt<SecureStorage>();
     print("Access token: ${token.getAccessToken().toString()}");
     await connection.buildConnection(token.getAccessToken());
     await connection.startConnection();
+  }
+
+  void onNewMessage(MessageModel message) =>
+      add(MessageRecievedEvent(message: message));
+  void onMessageDeletes(String id) => add(MessageDeleteEvent(id: id));
+
+  @override
+  Future<void> close() {
+    print("CLOSING SUBSCRIPTION");
+    for (final sub in _subs) {
+      sub.cancel();
+    }
+    return super.close();
   }
 }

@@ -47,7 +47,7 @@ class _ConversationPageState extends State<ConversationPage> {
                           var lastMessage = conversation.lastMessage;
                           return ConversationListItem(
                             onPressed: () => context.push(
-                              "/message/${conversation.id}/${user?.id}",
+                              "/message/${conversation.id}/${user.id}",
                             ),
                             title: user!.profile!.name,
                             subtitle:
@@ -118,6 +118,7 @@ class _ConversationPageState extends State<ConversationPage> {
             height: 50.h,
             margin: EdgeInsets.symmetric(horizontal: 10.r),
             padding: EdgeInsets.symmetric(horizontal: 10.r),
+            backgroundColor: theme.cardColor,
             child: Row(
               spacing: 20,
               children: [
@@ -139,14 +140,6 @@ class _ConversationPageState extends State<ConversationPage> {
           ),
 
           SizedBox(height: 20.h),
-
-          // TextButton(
-          //   onPressed: () async {
-          //     var storage = getIt<SecureStorage>();
-          //     await storage.deleteAllTokens();
-          //   },
-          //   child: Text("Logout"),
-          // ),
         ],
       ),
     );

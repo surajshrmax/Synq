@@ -1,0 +1,21 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit_state.dart';
+
+class MessageBoxCubit extends Cubit<MessageBoxCubitState> {
+  MessageBoxCubit()
+    : super(MessageBoxCubitState(isEditing: false, content: "", messageId: ""));
+
+  void startEditing(String messageId, String content) {
+    emit(
+      MessageBoxCubitState(
+        isEditing: true,
+        content: content,
+        messageId: messageId,
+      ),
+    );
+  }
+
+  void stopEditing() {
+    emit(MessageBoxCubitState(isEditing: false, content: "", messageId: ""));
+  }
+}

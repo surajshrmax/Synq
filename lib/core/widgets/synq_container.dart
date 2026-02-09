@@ -12,6 +12,7 @@ class SynqContainer extends StatelessWidget {
   final EdgeInsets? margin;
   final BorderRadius? borderRadius;
   final bool shadow;
+  final bool border;
   final Color? backgroundColor;
   final Color? shadowColor;
   final Color? borderColor;
@@ -26,6 +27,7 @@ class SynqContainer extends StatelessWidget {
     this.margin,
     this.boxConstraints,
     this.shadow = false,
+    this.border = false,
     this.backgroundColor,
     this.shadowColor,
     this.borderColor,
@@ -46,10 +48,9 @@ class SynqContainer extends StatelessWidget {
           color: backgroundColor ?? theme.scaffoldBackgroundColor,
           borderRadius:
               borderRadius ?? BorderRadius.circular(defaultBorderRadiusValue),
-          border: Border.all(
-            width: 2,
-            color: borderColor ?? theme.dividerColor,
-          ),
+          border: border
+              ? Border.all(width: 2, color: borderColor ?? theme.dividerColor)
+              : null,
           boxShadow: shadow
               ? [
                   BoxShadow(

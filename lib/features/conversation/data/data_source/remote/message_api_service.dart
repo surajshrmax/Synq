@@ -1,26 +1,24 @@
 import 'package:synq/core/network/api_client.dart';
 import 'package:synq/core/network/api_result.dart';
-import 'package:synq/features/conversation/data/models/message_model.dart';
+import 'package:synq/features/conversation/data/models/message_response.dart';
 
 class MessageApiService {
   final ApiClient apiClient;
 
   MessageApiService({required this.apiClient});
 
-  Future<ApiResult<List<MessageModel>>> getAllMessages(
+  Future<ApiResult<MessageResponse>> getAllMessages(
     String conversationId,
+    bool isConversationId,
+    String cursor,
   ) async {
-    var response = await apiClient.get<List<dynamic>>(
-      "/messages/$conversationId",
+    var response = await apiClient.get<MessageResponse>(
+      "/messages?chatId=$conversationId&isChatId=$isConversationId&lastCursorTime=$cursor&lastMessageId=0",
+      mapper: (json) => MessageResponse.fromJson(json),
     );
 
     return response.when(
-      success: (data) {
-        List<MessageModel> messages = data
-            .map((e) => MessageModel.fromJson(e))
-            .toList();
-        return ApiSuccess(data: messages);
-      },
+      success: (data) => ApiSuccess(data: data),
       failure: (error) => ApiFailure(error: error),
     );
   }

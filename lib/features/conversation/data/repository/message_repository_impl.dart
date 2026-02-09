@@ -1,6 +1,6 @@
 import 'package:synq/core/network/api_result.dart';
 import 'package:synq/features/conversation/data/data_source/remote/message_api_service.dart';
-import 'package:synq/features/conversation/data/models/message_model.dart';
+import 'package:synq/features/conversation/data/models/message_response.dart';
 import 'package:synq/features/conversation/domain/repository/message_repository.dart';
 
 class MessageRepositoryImpl extends MessageRepository {
@@ -9,10 +9,12 @@ class MessageRepositoryImpl extends MessageRepository {
   MessageRepositoryImpl({required this.apiService});
 
   @override
-  Future<ApiResult<List<MessageModel>>> getMessages(
+  Future<ApiResult<MessageResponse>> getMessages(
     String conversationId,
+    bool isConversationId,
+    String cursor,
   ) async {
-    return await apiService.getAllMessages(conversationId);
+    return await apiService.getAllMessages(conversationId, isConversationId, cursor);
   }
 
   @override

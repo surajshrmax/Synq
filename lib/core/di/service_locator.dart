@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:synq/config/constants.dart';
 import 'package:synq/core/network/api_client.dart';
 import 'package:synq/core/network/dio_api_client.dart';
 import 'package:synq/core/network/dio_factory.dart';
@@ -37,7 +38,7 @@ void setUpDI() {
     () => SecureStorage(FlutterSecureStorage()),
   );
   getIt.registerSingleton<ApiClient>(
-    DioApiClient(dio: DioFactory.create("http://192.168.135.74:5213")),
+    DioApiClient(dio: DioFactory.create(serverUrl)),
   );
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
@@ -121,7 +122,7 @@ void setUpDI() {
     () => MessageBloc(
       getAllMessagesUseCase: getIt<GetAllMessagesUseCase>(),
       sendMessageUseCase: getIt<SendMessageUseCase>(),
-      connection: MessageConnection()
+      connection: MessageConnection(),
     ),
   );
 }

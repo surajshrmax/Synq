@@ -11,11 +11,3 @@ class MessageStateLoaded extends MessageState {
 
   MessageStateLoaded({required this.messages});
 }
-
-class MessageStateSending extends MessageState {}
-
-class MessageStateSended extends MessageState {
-  final String messageId;
-
-  MessageStateSended({required this.messageId});
-}

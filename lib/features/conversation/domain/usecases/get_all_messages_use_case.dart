@@ -1,5 +1,5 @@
 import 'package:synq/core/network/api_result.dart';
-import 'package:synq/features/conversation/data/models/message_model.dart';
+import 'package:synq/features/conversation/data/models/message_response.dart';
 import 'package:synq/features/conversation/domain/repository/message_repository.dart';
 
 class GetAllMessagesUseCase {
@@ -7,7 +7,11 @@ class GetAllMessagesUseCase {
 
   GetAllMessagesUseCase({required this.messageRepository});
 
-  Future<ApiResult<List<MessageModel>>> call(String conversationId) async {
-    return await messageRepository.getMessages(conversationId);
+  Future<ApiResult<MessageResponse>> call(
+    String conversationId,
+    bool isConversationId,
+    String cursor,
+  ) async {
+    return await messageRepository.getMessages(conversationId, isConversationId,cursor);
   }
 }

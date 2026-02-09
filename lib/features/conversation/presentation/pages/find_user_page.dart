@@ -44,6 +44,7 @@ class FindUserPage extends StatelessWidget {
                       SizedBox(height: 20.h),
                       SynqContainer(
                         height: 50.h,
+                        backgroundColor: theme.cardColor,
                         child: Center(
                           child: TextField(
                             decoration: InputDecoration(
@@ -103,7 +104,8 @@ class FindUserPage extends StatelessWidget {
                       itemBuilder: (context, index) {
                         var user = state.users.elementAt(index);
                         return ConversationListItem(
-                          onPressed: () => context.go("/message/${user.id}"),
+                          onPressed: () =>
+                              context.push("/message/null/${user.id}"),
                           title: user.name,
                           subtitle: user.userName,
                           isVerified: user.isVerified,

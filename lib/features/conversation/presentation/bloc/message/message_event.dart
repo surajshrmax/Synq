@@ -5,8 +5,12 @@ abstract class MessageEvent {}
 
 class GetAllMessageEvent extends MessageEvent {
   final String conversationId;
+  final bool isConversationId;
 
-  GetAllMessageEvent({required this.conversationId});
+  GetAllMessageEvent({
+    required this.conversationId,
+    required this.isConversationId,
+  });
 }
 
 class SendMessageEvent extends MessageEvent {
@@ -25,6 +29,18 @@ class MessageRecievedEvent extends MessageEvent {
   final MessageModel message;
 
   MessageRecievedEvent({required this.message});
+}
+
+class MessageDeleteEvent extends MessageEvent {
+  final String id;
+
+  MessageDeleteEvent({required this.id});
+}
+
+class DeleteMessage extends MessageEvent {
+  final String id;
+
+  DeleteMessage({required this.id});
 }
 
 class StartListeningMessageEvent extends MessageEvent {}
