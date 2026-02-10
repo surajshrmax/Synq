@@ -44,46 +44,60 @@ class MessageListItem extends StatelessWidget {
               ),
             ),
           ),
-          Row(
-            spacing: 10,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 40,
-                width: 40,
-                child: ClipOval(child: Image.asset("assets/images/demo.jpg")),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      spacing: 5,
-                      children: [
-                        Text(
-                          name,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blue,
-                          ),
-                        ),
-                        // Icon(Icons.verified, size: 15, color: Colors.amber),
-                        Text(
-                          "at ${time.toLocal().hour}:${time.toLocal().minute} ${time.toLocal().hour < 12 ? 'AM' : 'PM'}",
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: textTheme?.secondaryTextColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Text(message, style: TextStyle(fontSize: 16)),
-                  ],
+          Dismissible(
+            direction: DismissDirection.endToStart,
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              padding: EdgeInsets.all(10),
+              child: Icon(Icons.reply),
+            ),
+            confirmDismiss: (direction) async {
+              return false;
+            },
+            onDismissed: (direction) {},
+            key: ValueKey(time),
+            child: Row(
+              spacing: 10,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 40,
+                  width: 40,
+                  child: ClipOval(child: Image.asset("assets/images/demo.jpg")),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        spacing: 5,
+                        children: [
+                          Text(
+                            name,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.blue,
+                            ),
+                          ),
+                          // Icon(Icons.verified, size: 15, color: Colors.amber),
+                          Text(
+                            "at ${time.toLocal().hour}:${time.toLocal().minute} ${time.toLocal().hour < 12 ? 'AM' : 'PM'}",
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: textTheme?.secondaryTextColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(message, style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

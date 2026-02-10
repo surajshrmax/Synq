@@ -43,7 +43,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     var response = await getAllMessagesUseCase.call(
       event.conversationId,
       event.isConversationId,
-      "null"
+      "null",
     );
 
     response.when(
@@ -76,8 +76,10 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     Emitter<MessageState> emit,
   ) async {
     print("INSIDE BLOC DELETING MESSAGE");
+    final message = _messages.where((m) => m.id == event.id).firstOrNull;
+    // emit(MessageStateLoaded(messages: _messages));
+    emit(MessageStateRemoved(message: message!));
     _messages.removeWhere((m) => m.id == event.id);
-    emit(MessageStateLoaded(messages: _messages));
   }
 
   Future<void> _onMessageRecieved(
@@ -85,11 +87,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     Emitter<MessageState> emit,
   ) async {
     print("INSIDE BLOC HITTING ON_MESSAGE_RECIEVED");
-    emit(
-      MessageStateLoaded(
-        messages: List<MessageModel>.from(_messages)..add(event.message),
-      ),
-    );
+    emit(MessageStateNewMessage(message: event.message));
     _messages.add(event.message);
   }
 

@@ -19,23 +19,8 @@ class _MessageListState extends State<MessageList> {
 
   late OverlayEntry overlayEntry;
 
-  void applyDiff(List<MessageModel> newMessages) {
+  void addMultipleMessage(List<MessageModel> newMessages) {
     final existingIds = _messages.map((e) => e.id).toSet();
-
-    final newIds = newMessages.map((m) => m.id).toSet();
-
-    final deletes = _messages.where((e) => !newIds.contains(e.id)).toList();
-
-    for (final msg in deletes) {
-      print("INSIDE APPLY_DIFF DELETING MESSAGE");
-      int index = _messages.indexOf(msg);
-      _messages.removeAt(index);
-      _listKey.currentState!.removeItem(
-        index,
-        duration: Duration(milliseconds: 100),
-        (context, animation) => _messageItem(animation, msg, index),
-      );
-    }
 
     final incoming = newMessages
         .where((m) => !existingIds.contains(m.id))
@@ -45,6 +30,23 @@ class _MessageListState extends State<MessageList> {
       _messages.insert(0, incoming[i]);
       _listKey.currentState!.insertItem(0);
     }
+  }
+
+  void addSingleMessage(MessageModel message) {
+    print("INSIDE ADD NEW SINGLE MESSAGE");
+    _messages.insert(0, message);
+    _listKey.currentState!.insertItem(0);
+  }
+
+  void removeMessage(MessageModel message) {
+    print("INSIDE REMOVE MESSAGE");
+    int index = _messages.indexOf(message);
+    _messages.removeAt(index);
+    _listKey.currentState!.removeItem(
+      index,
+      duration: Duration(milliseconds: 100),
+      (context, animation) => _messageItem(animation, message, index),
+    );
   }
 
   bool showTimeHeader(List<MessageModel> list, int index) {
@@ -60,9 +62,18 @@ class _MessageListState extends State<MessageList> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<MessageBloc, MessageState>(
-      listenWhen: (previous, current) => current is MessageStateLoaded,
-      listener: (context, state) =>
-          applyDiff((state as MessageStateLoaded).messages.reversed.toList()),
+      listenWhen: (previous, current) =>
+          current is MessageStateLoaded ||
+          current is MessageStateNewMessage ||
+          current is MessageStateRemoved,
+      listener: (context, state) => switch (state) {
+        MessageStateLoaded() => addMultipleMessage(
+          state.messages.reversed.toList(),
+        ),
+        MessageStateNewMessage() => addSingleMessage(state.message),
+        MessageStateRemoved() => removeMessage(state.message),
+        MessageState() => throw UnimplementedError(),
+      },
       child: AnimatedList(
         key: _listKey,
         reverse: true,
@@ -84,7 +95,7 @@ class _MessageListState extends State<MessageList> {
       child: MessageListItem(
         onPressed: () => widget.onPressed(message.id, message.content),
         name: message.sender.profile!.name,
-        message: message.content,
+        message: "${message.content} ${_messages.indexOf(message)}",
         imageUrl: message.sender.profile!.imageUrl,
         time: message.sendAt,
         showTime: showTimeHeader(_messages, index),

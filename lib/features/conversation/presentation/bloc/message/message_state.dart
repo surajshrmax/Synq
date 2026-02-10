@@ -11,3 +11,15 @@ class MessageStateLoaded extends MessageState {
 
   MessageStateLoaded({required this.messages});
 }
+
+class MessageStateNewMessage extends MessageState {
+  final MessageModel message;
+
+  MessageStateNewMessage({required this.message});
+}
+
+class MessageStateRemoved extends MessageState {
+  final MessageModel message;
+
+  MessageStateRemoved({required this.message});
+}
