@@ -25,6 +25,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   }) : super(MessageStateInitial()) {
     _subs.add(connection.messages.listen((msg) => onNewMessage(msg)));
     _subs.add(connection.deletes.listen((id) => onMessageDeletes(id)));
+    _subs.add(connection.updates.listen((msg) => onMessageUpdate(msg)));
 
     on<GetAllMessageEvent>(_onGetAllMessagesEvent);
     on<SendMessageEvent>(_sendMessageEvent);
@@ -32,6 +33,8 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     on<MessageRecievedEvent>(_onMessageRecieved);
     on<DeleteMessage>(_onDeleteMessage);
     on<MessageDeleteEvent>(_onMessageDeleteEvent);
+    on<UpdateMessage>(_onUpdateMessage);
+    on<MessageUpdateEvent>(_onMessageUpdateEvent);
   }
 
   Future<void> _onGetAllMessagesEvent(
@@ -102,9 +105,30 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     await connection.startConnection();
   }
 
+  Future<void> _onUpdateMessage(
+    UpdateMessage event,
+    Emitter<MessageState> emit,
+  ) async {
+    await connection.updateMessage(event.id, event.content);
+  }
+
+  Future<void> _onMessageUpdateEvent(
+    MessageUpdateEvent event,
+    Emitter<MessageState> emit,
+  ) async {
+    var msg = _messages.where((m) => m.id == event.message.id).first;
+    final index = _messages.indexOf(msg);
+    _messages[index] = event.message;
+    emit(MessageStateUpdated(index: index, message: event.message));
+  }
+
   void onNewMessage(MessageModel message) =>
       add(MessageRecievedEvent(message: message));
+
   void onMessageDeletes(String id) => add(MessageDeleteEvent(id: id));
+
+  void onMessageUpdate(MessageModel message) =>
+      add(MessageUpdateEvent(message: message));
 
   @override
   Future<void> close() {

@@ -8,6 +8,7 @@ import 'package:synq/features/conversation/data/data_source/remote/message_api_s
 import 'package:synq/features/conversation/data/models/message_model.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_bloc.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit.dart';
+import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit_state.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_event.dart';
 import 'package:synq/features/conversation/presentation/bloc/user/user_bloc.dart';
 import 'package:synq/features/conversation/presentation/bloc/user/user_event.dart';
@@ -30,6 +31,11 @@ class MessagePage extends StatefulWidget {
 
 class _MessagePageState extends State<MessagePage> {
   late UserModel user;
+  var _messageBoxCubitState = MessageBoxCubitState(
+    isEditing: false,
+    content: "",
+    messageId: '',
+  );
 
   @override
   void initState() {
@@ -57,6 +63,27 @@ class _MessagePageState extends State<MessagePage> {
         current.day != next.day;
   }
 
+  void sendMessage() {
+    bool isConversationId = !widget.conversationId.contains("null");
+    context.read<MessageBloc>().add(
+      SendMessageEvent(
+        id: isConversationId ? widget.conversationId : widget.userID,
+        type: isConversationId ? IdType.conversation : IdType.user,
+        content: widget.messageController.text,
+      ),
+    );
+  }
+
+  void updateMessage() {
+    context.read<MessageBloc>().add(
+      UpdateMessage(
+        id: _messageBoxCubitState.messageId,
+        content: widget.messageController.text,
+      ),
+    );
+    context.read<MessageBoxCubit>().stopEditing();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -76,22 +103,20 @@ class _MessagePageState extends State<MessagePage> {
               ),
             ),
 
-            MessageBox(
-              onSendButtonPressed: () {
-                bool isConversationId = !widget.conversationId.contains("null");
-                context.read<MessageBloc>().add(
-                  SendMessageEvent(
-                    id: isConversationId
-                        ? widget.conversationId
-                        : widget.userID,
-                    type: isConversationId ? IdType.conversation : IdType.user,
-                    content: widget.messageController.text,
-                  ),
-                );
-                widget.messageController.text = "";
-              },
-              onPickButtonPressed: () {},
-              messageBoxController: widget.messageController,
+            BlocListener<MessageBoxCubit, MessageBoxCubitState>(
+              listener: (context, state) => _messageBoxCubitState = state,
+              child: MessageBox(
+                onSendButtonPressed: () {
+                  if (!_messageBoxCubitState.isEditing) {
+                    sendMessage();
+                  } else {
+                    updateMessage();
+                  }
+                  widget.messageController.text = "";
+                },
+                onPickButtonPressed: () {},
+                messageBoxController: widget.messageController,
+              ),
             ),
             SizedBox(height: mediaQuery.padding.bottom),
           ],

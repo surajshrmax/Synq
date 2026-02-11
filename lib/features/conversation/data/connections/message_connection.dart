@@ -19,6 +19,10 @@ class MessageConnection {
       StreamController.broadcast();
   Stream<String> get deletes => _deleteMessageController.stream;
 
+  final StreamController<MessageModel> _updateMessageController =
+      StreamController.broadcast();
+  Stream<MessageModel> get updates => _updateMessageController.stream;
+
   Future<void> buildConnection(Future<String?> token) async {
     hubConnection = HubConnectionBuilder()
         .withUrl(
@@ -64,6 +68,46 @@ class MessageConnection {
       }
     });
 
+    hubConnection.on("MessageUpdate", (args) {
+      print("GETTING UPDATE REQUEST FROM SERVER");
+      if (args != null && args.isNotEmpty) {
+        final dynamic raw = args[0];
+
+        MessageModel message;
+
+        if (raw is Map<String, dynamic>) {
+          message = MessageModel.fromJson(raw);
+        } else if (raw is String) {
+          message = MessageModel.fromJson(jsonDecode(raw));
+        } else {
+          print('unknown message type');
+          return;
+        }
+
+        _updateMessageController.add(message);
+      }
+    });
+
+    hubConnection.on("UpdateDone", (args) {
+      print("GETTING UPDATE REQUEST FROM SERVER");
+      if (args != null && args.isNotEmpty) {
+        final dynamic raw = args[0];
+
+        MessageModel message;
+
+        if (raw is Map<String, dynamic>) {
+          message = MessageModel.fromJson(raw);
+        } else if (raw is String) {
+          message = MessageModel.fromJson(jsonDecode(raw));
+        } else {
+          print('unknown message type');
+          return;
+        }
+
+        _updateMessageController.add(message);
+      }
+    });
+
     try {
       await hubConnection.start();
       print("connected");
@@ -83,5 +127,14 @@ class MessageConnection {
 
   Future<void> deleteMessage(String id) async {
     await hubConnection.invoke("DeleteMessage", args: [id]);
+  }
+
+  Future<void> updateMessage(String id, String content) async {
+    await hubConnection.invoke(
+      "UpdateMessage",
+      args: [
+        {"messageId": id, "content": content},
+      ],
+    );
   }
 }

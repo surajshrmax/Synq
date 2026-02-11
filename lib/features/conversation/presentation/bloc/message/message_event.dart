@@ -43,4 +43,17 @@ class DeleteMessage extends MessageEvent {
   DeleteMessage({required this.id});
 }
 
+class UpdateMessage extends MessageEvent {
+  final String id;
+  final String content;
+
+  UpdateMessage({required this.id, required this.content});
+}
+
+class MessageUpdateEvent extends MessageEvent {
+  final MessageModel message;
+
+  MessageUpdateEvent({required this.message});
+}
+
 class StartListeningMessageEvent extends MessageEvent {}

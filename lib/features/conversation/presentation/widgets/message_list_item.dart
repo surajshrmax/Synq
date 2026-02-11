@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/core/widgets/synq_container.dart';
+import 'package:synq/features/conversation/data/models/message_model.dart';
 
 class MessageListItem extends StatelessWidget {
   final VoidCallback onPressed;
-  final String name;
-  final String message;
-  final String imageUrl;
-  final DateTime time;
+  final MessageModel message;
   final bool showTime;
-
   const MessageListItem({
     super.key,
     required this.onPressed,
-    required this.name,
     required this.message,
-    required this.imageUrl,
-    required this.time,
     this.showTime = false,
   });
 
@@ -38,7 +32,9 @@ class MessageListItem extends StatelessWidget {
                 spacing: 20,
                 children: [
                   Expanded(child: Divider()),
-                  Text("${time.day}/${time.month}/${time.year}"),
+                  Text(
+                    "${message.sendAt.toLocal().day}/${message.sendAt.toLocal().month}/${message.sendAt.toLocal().year}",
+                  ),
                   Expanded(child: Divider()),
                 ],
               ),
@@ -56,7 +52,7 @@ class MessageListItem extends StatelessWidget {
               return false;
             },
             onDismissed: (direction) {},
-            key: ValueKey(time),
+            key: ValueKey(message.sendAt),
             child: Row(
               spacing: 10,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -75,7 +71,7 @@ class MessageListItem extends StatelessWidget {
                         spacing: 5,
                         children: [
                           Text(
-                            name,
+                            message.sender.profile!.name,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -84,15 +80,29 @@ class MessageListItem extends StatelessWidget {
                           ),
                           // Icon(Icons.verified, size: 15, color: Colors.amber),
                           Text(
-                            "at ${time.toLocal().hour}:${time.toLocal().minute} ${time.toLocal().hour < 12 ? 'AM' : 'PM'}",
+                            "at ${message.sendAt.toLocal().hour}:${message.sendAt.toLocal().minute} ${message.sendAt.toLocal().hour < 12 ? 'AM' : 'PM'}",
                             style: TextStyle(
                               fontSize: 10,
                               color: textTheme?.secondaryTextColor,
                             ),
                           ),
+                          Visibility(
+                            visible: message.isEdited,
+                            child: Icon(
+                              Icons.edit,
+                              size: 10,
+                              color: textTheme?.secondaryTextColor,
+                            ),
+                          ),
+                          // ),
+                          // SizedBox(
+                          //   height: 10,
+                          //   width: 10,
+                          //   child: CircularProgressIndicator(strokeWidth: 2),
+                          // ),
                         ],
                       ),
-                      Text(message, style: TextStyle(fontSize: 16)),
+                      Text(message.content, style: TextStyle(fontSize: 16)),
                     ],
                   ),
                 ),

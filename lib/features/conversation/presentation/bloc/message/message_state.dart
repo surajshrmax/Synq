@@ -23,3 +23,10 @@ class MessageStateRemoved extends MessageState {
 
   MessageStateRemoved({required this.message});
 }
+
+class MessageStateUpdated extends MessageState {
+  final int index;
+  final MessageModel message;
+
+  MessageStateUpdated({required this.index, required this.message});
+}

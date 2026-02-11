@@ -49,6 +49,12 @@ class _MessageListState extends State<MessageList> {
     );
   }
 
+  void updateMessage(int index, MessageModel newMessage) {
+    setState(() {
+      _messages[index] = newMessage;
+    });
+  }
+
   bool showTimeHeader(List<MessageModel> list, int index) {
     if (index == list.length - 1) return true;
     final current = list[index].sendAt.toLocal();
@@ -65,13 +71,15 @@ class _MessageListState extends State<MessageList> {
       listenWhen: (previous, current) =>
           current is MessageStateLoaded ||
           current is MessageStateNewMessage ||
-          current is MessageStateRemoved,
+          current is MessageStateRemoved ||
+          current is MessageStateUpdated,
       listener: (context, state) => switch (state) {
         MessageStateLoaded() => addMultipleMessage(
           state.messages.reversed.toList(),
         ),
         MessageStateNewMessage() => addSingleMessage(state.message),
         MessageStateRemoved() => removeMessage(state.message),
+        MessageStateUpdated() => updateMessage(state.index, state.message),
         MessageState() => throw UnimplementedError(),
       },
       child: AnimatedList(
@@ -94,10 +102,7 @@ class _MessageListState extends State<MessageList> {
       sizeFactor: animation,
       child: MessageListItem(
         onPressed: () => widget.onPressed(message.id, message.content),
-        name: message.sender.profile!.name,
-        message: "${message.content} ${_messages.indexOf(message)}",
-        imageUrl: message.sender.profile!.imageUrl,
-        time: message.sendAt,
+        message: message,
         showTime: showTimeHeader(_messages, index),
       ),
     );
