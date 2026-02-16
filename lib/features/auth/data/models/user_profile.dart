@@ -1,8 +1,8 @@
 class UserProfile {
-  final String name;
-  final String imageUrl;
-  final String bio;
-  final DateTime lastSeen;
+  final String? name;
+  final String? imageUrl;
+  final String? bio;
+  final DateTime? lastSeen;
 
   UserProfile({
     required this.name,
@@ -15,6 +15,8 @@ class UserProfile {
     name: json['name'],
     imageUrl: json['imageUrl'],
     bio: json['bio'],
-    lastSeen: DateTime.parse(json['lastSeenAt']),
+    lastSeen: json['lastSeenAt'] != null
+        ? DateTime.parse(json['lastSeenAt'])
+        : null,
   );
 }

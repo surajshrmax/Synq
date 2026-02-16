@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synq/features/conversation/data/models/message_model.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_bloc.dart';
+import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_state.dart';
 import 'package:synq/features/conversation/presentation/widgets/message_list_item.dart';
 
@@ -57,8 +58,8 @@ class _MessageListState extends State<MessageList> {
 
   bool showTimeHeader(List<MessageModel> list, int index) {
     if (index == list.length - 1) return true;
-    final current = list[index].sendAt.toLocal();
-    final next = list[index + 1].sendAt.toLocal();
+    final current = list[index].sendAt!.toLocal();
+    final next = list[index + 1].sendAt!.toLocal();
 
     return current.year != next.year ||
         current.month != next.month ||
@@ -102,6 +103,10 @@ class _MessageListState extends State<MessageList> {
       sizeFactor: animation,
       child: MessageListItem(
         onPressed: () => widget.onPressed(message.id, message.content),
+        onDrag: (direction) async {
+          context.read<MessageBoxCubit>().addReply(message.id, message.content);
+          return false;
+        },
         message: message,
         showTime: showTimeHeader(_messages, index),
       ),

@@ -63,7 +63,12 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     Emitter<MessageState> emit,
   ) async {
     print("SENT MESSAGE TO CONNECTION");
-    await connection.sendMessage(event.id, event.type, event.content);
+    await connection.sendMessage(
+      event.id,
+      event.type,
+      event.content,
+      event.replyMessageId,
+    );
   }
 
   Future<void> _onDeleteMessage(

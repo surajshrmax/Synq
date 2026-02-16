@@ -17,11 +17,13 @@ class SendMessageEvent extends MessageEvent {
   final String id;
   final IdType type;
   final String content;
+  final String? replyMessageId;
 
   SendMessageEvent({
     required this.id,
     required this.type,
     required this.content,
+    required this.replyMessageId,
   });
 }
 

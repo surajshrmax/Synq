@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 
 //app colors
-final lightBackgroundColor = Colors.white;
+//#e1dfea
+//f1f1f1
+//ecf4e5
+//f3f4e5
+final lightBackgroundColor = Color(0xffe1dfea);
 // final lightBackgroundColor = Color(0xffe8d8c9);
 // final lightBackgroundColor = Color(0xfffdfec2);
 final darkBackgroundColor = Color(0xff121312);

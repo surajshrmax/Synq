@@ -23,6 +23,7 @@ class MessagePage extends StatefulWidget {
   final String userID;
 
   final TextEditingController messageController = TextEditingController();
+  final FocusNode messageFocusNode = FocusNode();
   MessagePage({super.key, required this.conversationId, required this.userID});
 
   @override
@@ -55,8 +56,8 @@ class _MessagePageState extends State<MessagePage> {
 
   bool showTimeHeader(List<MessageModel> list, int index) {
     if (index == list.length - 1) return true;
-    final current = list[index].sendAt.toLocal();
-    final next = list[index + 1].sendAt.toLocal();
+    final current = list[index].sendAt!.toLocal();
+    final next = list[index + 1].sendAt!.toLocal();
 
     return current.year != next.year ||
         current.month != next.month ||
@@ -70,8 +71,15 @@ class _MessagePageState extends State<MessagePage> {
         id: isConversationId ? widget.conversationId : widget.userID,
         type: isConversationId ? IdType.conversation : IdType.user,
         content: widget.messageController.text,
+        replyMessageId: _messageBoxCubitState.isReplying
+            ? _messageBoxCubitState.messageId
+            : null,
       ),
     );
+
+    if (_messageBoxCubitState.isReplying) {
+      context.read<MessageBoxCubit>().clear();
+    }
   }
 
   void updateMessage() {
@@ -81,7 +89,7 @@ class _MessagePageState extends State<MessagePage> {
         content: widget.messageController.text,
       ),
     );
-    context.read<MessageBoxCubit>().stopEditing();
+    context.read<MessageBoxCubit>().clear();
   }
 
   @override
@@ -98,6 +106,7 @@ class _MessagePageState extends State<MessagePage> {
             Expanded(
               child: MessageList(
                 onPressed: (id, content) {
+                  widget.messageFocusNode.unfocus();
                   showMessageOptions(context, id, content);
                 },
               ),
@@ -116,6 +125,7 @@ class _MessagePageState extends State<MessagePage> {
                 },
                 onPickButtonPressed: () {},
                 messageBoxController: widget.messageController,
+                messageFocusNode: widget.messageFocusNode,
               ),
             ),
             SizedBox(height: mediaQuery.padding.bottom),
@@ -156,7 +166,7 @@ class _MessagePageState extends State<MessagePage> {
                       if (state is UserStateInfoLoaded) {
                         user = state.user;
                         return Text(
-                          user.profile!.name,
+                          user.profile!.name!,
                           style: TextStyle(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w500,

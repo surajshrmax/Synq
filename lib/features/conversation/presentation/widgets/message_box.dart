@@ -11,11 +11,14 @@ class MessageBox extends StatefulWidget {
   final VoidCallback onSendButtonPressed;
   final VoidCallback onPickButtonPressed;
   final TextEditingController messageBoxController;
-  const MessageBox({
+  final FocusNode messageFocusNode;
+
+  MessageBox({
     super.key,
     required this.onSendButtonPressed,
     required this.onPickButtonPressed,
     required this.messageBoxController,
+    required this.messageFocusNode,
   });
 
   @override
@@ -36,14 +39,19 @@ class _MessageBoxState extends State<MessageBox> {
       setState(() {
         isTextBoxEmpty = value;
       });
+      widget.messageFocusNode.requestFocus();
     }
 
     return BlocListener<MessageBoxCubit, MessageBoxCubitState>(
       listener: (context, state) {
-        state.isEditing
-            ? widget.messageBoxController.text = state.content
-            : widget.messageBoxController.text = "";
-        updateState(!state.isEditing);
+        if (state.isEditing) {
+          widget.messageBoxController.text = state.content;
+          updateState(!state.isEditing);
+        } else if (state.isReplying) {
+          updateState(!state.isReplying);
+        } else {
+          widget.messageBoxController.text = "";
+        }
       },
       child: SynqContainer(
         margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
@@ -61,7 +69,7 @@ class _MessageBoxState extends State<MessageBox> {
             children: [
               BlocBuilder<MessageBoxCubit, MessageBoxCubitState>(
                 builder: (context, state) {
-                  return state.isEditing
+                  return state.isEditing || state.isReplying
                       ? SynqContainer(
                           width: double.infinity,
                           padding: EdgeInsets.symmetric(horizontal: 10),
@@ -73,22 +81,28 @@ class _MessageBoxState extends State<MessageBox> {
                             spacing: 10,
                             children: [
                               Icon(
-                                Icons.edit,
+                                state.isEditing ? Icons.edit : Icons.reply,
                                 color: textTheme?.secondaryTextColor,
+                                size: 14,
                               ),
-                              Text(
-                                "Edit Message",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: textTheme?.secondaryTextColor,
+                              Expanded(
+                                child: Text(
+                                  maxLines: 1,
+                                  state.isEditing
+                                      ? "Edit Message"
+                                      : state.content,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: textTheme?.secondaryTextColor,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              Spacer(),
+
                               GestureDetector(
-                                onTap: () => context
-                                    .read<MessageBoxCubit>()
-                                    .stopEditing(),
+                                onTap: () =>
+                                    context.read<MessageBoxCubit>().clear(),
                                 child: Icon(Icons.remove),
                               ),
                             ],
@@ -117,6 +131,7 @@ class _MessageBoxState extends State<MessageBox> {
                   ),
                   Expanded(
                     child: TextField(
+                      focusNode: widget.messageFocusNode,
                       minLines: null,
                       maxLines: null,
                       decoration: InputDecoration(

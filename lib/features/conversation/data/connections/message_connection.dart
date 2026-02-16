@@ -116,11 +116,21 @@ class MessageConnection {
     }
   }
 
-  Future<void> sendMessage(String id, IdType type, String content) async {
+  Future<void> sendMessage(
+    String id,
+    IdType type,
+    String content,
+    String? replyMessageId,
+  ) async {
     await hubConnection.invoke(
       "SendMessage",
       args: [
-        {"id": id, "type": type.index, "content": content},
+        {
+          "id": id,
+          "type": type.index,
+          "content": content,
+          "replyMessageId": replyMessageId,
+        },
       ],
     );
   }

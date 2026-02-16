@@ -15,7 +15,24 @@ class MessageBoxCubit extends Cubit<MessageBoxCubitState> {
     );
   }
 
-  void stopEditing() {
-    emit(MessageBoxCubitState(isEditing: false, content: "", messageId: ""));
+  void clear() {
+    emit(
+      MessageBoxCubitState(
+        messageId: "",
+        isReplying: false,
+        isEditing: false,
+        content: "",
+      ),
+    );
+  }
+
+  void addReply(String messageId, String content) {
+    emit(
+      MessageBoxCubitState(
+        isReplying: true,
+        messageId: messageId,
+        content: content,
+      ),
+    );
   }
 }

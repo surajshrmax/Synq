@@ -2,7 +2,7 @@ import 'package:synq/features/auth/data/models/user_profile.dart';
 
 class UserModel {
   final String id;
-  final String userName;
+  final String? userName;
   final String? email;
   final UserProfile? profile;
 

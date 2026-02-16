@@ -49,10 +49,10 @@ class _ConversationPageState extends State<ConversationPage> {
                             onPressed: () => context.push(
                               "/message/${conversation.id}/${user.id}",
                             ),
-                            title: user!.profile!.name,
+                            title: user!.profile!.name!,
                             subtitle:
                                 "${conversation.id == lastMessage!.senderId ? "You: " : ""}${lastMessage.content}",
-                            date: "${lastMessage.sendAt.day.toString()} Jan",
+                            date: "${lastMessage.sendAt!.day.toString()} Jan",
                             unreads: 1,
                           );
                         },
