@@ -8,8 +8,15 @@ class MessageStateLoading extends MessageState {}
 
 class MessageStateLoaded extends MessageState {
   final List<MessageModel> messages;
+  final String cursor;
 
-  MessageStateLoaded({required this.messages});
+  MessageStateLoaded({required this.messages, required this.cursor});
+}
+
+class MessageStateMoreItemsLoaded extends MessageState {
+  final List<MessageModel> messages;
+
+  MessageStateMoreItemsLoaded({required this.messages});
 }
 
 class MessageStateNewMessage extends MessageState {

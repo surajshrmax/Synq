@@ -3,12 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synq/features/conversation/data/models/message_model.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_bloc.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit.dart';
+import 'package:synq/features/conversation/presentation/bloc/message/message_event.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_state.dart';
 import 'package:synq/features/conversation/presentation/widgets/message_list_item.dart';
 
 class MessageList extends StatefulWidget {
   final Function(String id, String content) onPressed;
-  const MessageList({super.key, required this.onPressed});
+  final ScrollController scrollController;
+  const MessageList({
+    super.key,
+    required this.onPressed,
+    required this.scrollController,
+  });
 
   @override
   State<MessageList> createState() => _MessageListState();
@@ -18,9 +24,7 @@ class _MessageListState extends State<MessageList> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey();
   final List<MessageModel> _messages = [];
 
-  late OverlayEntry overlayEntry;
-
-  void addMultipleMessage(List<MessageModel> newMessages) {
+  void addMultipleMessage(List<MessageModel> newMessages, String _cursor) {
     final existingIds = _messages.map((e) => e.id).toSet();
 
     final incoming = newMessages
@@ -30,6 +34,13 @@ class _MessageListState extends State<MessageList> {
     for (int i = 0; i < incoming.length; i++) {
       _messages.insert(0, incoming[i]);
       _listKey.currentState!.insertItem(0);
+    }
+  }
+
+  void onMoreItemsLoaded(List<MessageModel> messages) {
+    for (int i = 0; i < messages.length; i++) {
+      _messages.add(messages[i]);
+      _listKey.currentState!.insertItem(_messages.indexOf(messages[i]));
     }
   }
 
@@ -71,19 +82,23 @@ class _MessageListState extends State<MessageList> {
     return BlocListener<MessageBloc, MessageState>(
       listenWhen: (previous, current) =>
           current is MessageStateLoaded ||
+          current is MessageStateMoreItemsLoaded ||
           current is MessageStateNewMessage ||
           current is MessageStateRemoved ||
           current is MessageStateUpdated,
       listener: (context, state) => switch (state) {
         MessageStateLoaded() => addMultipleMessage(
           state.messages.reversed.toList(),
+          state.cursor,
         ),
+        MessageStateMoreItemsLoaded() => onMoreItemsLoaded(state.messages),
         MessageStateNewMessage() => addSingleMessage(state.message),
         MessageStateRemoved() => removeMessage(state.message),
         MessageStateUpdated() => updateMessage(state.index, state.message),
         MessageState() => throw UnimplementedError(),
       },
       child: AnimatedList(
+        controller: widget.scrollController,
         key: _listKey,
         reverse: true,
         initialItemCount: _messages.length,
@@ -109,6 +124,7 @@ class _MessageListState extends State<MessageList> {
         },
         message: message,
         showTime: showTimeHeader(_messages, index),
+        index: index,
       ),
     );
   }

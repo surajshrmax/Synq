@@ -6,11 +6,19 @@ abstract class MessageEvent {}
 class GetAllMessageEvent extends MessageEvent {
   final String conversationId;
   final bool isConversationId;
+  final String cursor;
 
   GetAllMessageEvent({
     required this.conversationId,
     required this.isConversationId,
+    required this.cursor,
   });
+}
+
+class LoadMoreMessageEvent extends MessageEvent {
+  final String conversationId;
+
+  LoadMoreMessageEvent({required this.conversationId});
 }
 
 class SendMessageEvent extends MessageEvent {

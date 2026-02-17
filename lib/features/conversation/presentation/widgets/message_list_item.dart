@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/core/widgets/synq_container.dart';
 import 'package:synq/features/conversation/data/models/message_model.dart';
+import 'package:synq/features/conversation/presentation/bloc/message/message_bloc.dart';
+import 'package:synq/features/conversation/presentation/bloc/message/message_state.dart';
 
 class MessageListItem extends StatelessWidget {
   final VoidCallback onPressed;
   final MessageModel message;
   final bool showTime;
   final Function(DismissDirection direction) onDrag;
+  final int index;
   const MessageListItem({
     super.key,
     required this.onPressed,
     required this.message,
     this.showTime = false,
     required this.onDrag,
+    required this.index,
   });
 
   @override
@@ -58,26 +63,29 @@ class MessageListItem extends StatelessWidget {
               spacing: 10,
               children: [
                 message.reply != null
-                    ? Row(
-                        spacing: 10,
-                        children: [
-                          Icon(
-                            Icons.reply,
-                            size: 14,
-                            color: textTheme?.secondaryTextColor,
-                          ),
-                          Expanded(
-                            child: Text(
-                              message.reply!.content,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: textTheme?.secondaryTextColor,
+                    ? Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          spacing: 10,
+                          children: [
+                            Icon(
+                              Icons.reply,
+                              size: 14,
+                              color: textTheme?.secondaryTextColor,
+                            ),
+                            Expanded(
+                              child: Text(
+                                message.reply!.content,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: textTheme?.secondaryTextColor,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       )
                     : SizedBox(),
                 Row(
@@ -104,7 +112,9 @@ class MessageListItem extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
-                                  color: Colors.blue,
+                                  color: index % 2 == 0
+                                      ? Colors.blue
+                                      : Colors.orange,
                                 ),
                               ),
                               // Icon(Icons.verified, size: 15, color: Colors.amber),
@@ -123,12 +133,6 @@ class MessageListItem extends StatelessWidget {
                                   color: textTheme?.secondaryTextColor,
                                 ),
                               ),
-                              // ),
-                              // SizedBox(
-                              //   height: 10,
-                              //   width: 10,
-                              //   child: CircularProgressIndicator(strokeWidth: 2),
-                              // ),
                             ],
                           ),
                           Text(message.content, style: TextStyle(fontSize: 16)),

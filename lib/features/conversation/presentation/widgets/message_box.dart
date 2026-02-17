@@ -13,7 +13,7 @@ class MessageBox extends StatefulWidget {
   final TextEditingController messageBoxController;
   final FocusNode messageFocusNode;
 
-  MessageBox({
+  const MessageBox({
     super.key,
     required this.onSendButtonPressed,
     required this.onPickButtonPressed,
@@ -56,7 +56,7 @@ class _MessageBoxState extends State<MessageBox> {
       child: SynqContainer(
         margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
         border: true,
-        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
         borderRadius: BorderRadius.circular(40),
         boxConstraints: BoxConstraints(
           maxHeight: mediaQuery.size.height * 0.40,
@@ -120,8 +120,8 @@ class _MessageBoxState extends State<MessageBox> {
                     duration: Duration(milliseconds: 200),
                     child: isTextBoxEmpty
                         ? SynqAnimatedContainer(
-                            height: 50.h,
-                            width: 50.h,
+                            height: 40.h,
+                            width: 40.h,
                             shadowOffSet: Offset(1, 1),
                             onPressed: () {},
                             borderRadius: BorderRadius.circular(30),
@@ -150,8 +150,8 @@ class _MessageBoxState extends State<MessageBox> {
                   AnimatedSize(
                     duration: Duration(milliseconds: 200),
                     child: SizedBox(
-                      height: 50.h,
-                      width: 50.h,
+                      height: 40.h,
+                      width: 40.h,
                       child: isTextBoxEmpty
                           ? SizedBox.shrink()
                           : SynqAnimatedContainer(

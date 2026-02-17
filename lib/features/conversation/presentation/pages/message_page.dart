@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/core/widgets/synq_container.dart';
 import 'package:synq/core/widgets/synq_icon_button.dart';
@@ -10,6 +13,7 @@ import 'package:synq/features/conversation/presentation/bloc/message/message_blo
 import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit_state.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_event.dart';
+import 'package:synq/features/conversation/presentation/bloc/message/message_state.dart';
 import 'package:synq/features/conversation/presentation/bloc/user/user_bloc.dart';
 import 'package:synq/features/conversation/presentation/bloc/user/user_event.dart';
 import 'package:synq/features/conversation/presentation/bloc/user/user_state.dart';
@@ -23,6 +27,7 @@ class MessagePage extends StatefulWidget {
   final String userID;
 
   final TextEditingController messageController = TextEditingController();
+  final ScrollController scrollController = ScrollController();
   final FocusNode messageFocusNode = FocusNode();
   MessagePage({super.key, required this.conversationId, required this.userID});
 
@@ -38,6 +43,9 @@ class _MessagePageState extends State<MessagePage> {
     messageId: '',
   );
 
+  bool _isLoading = false;
+  String _cursor = "null";
+
   @override
   void initState() {
     context.read<UserBloc>().add(GetUserInfoEvent(userId: widget.userID));
@@ -47,10 +55,20 @@ class _MessagePageState extends State<MessagePage> {
             ? widget.userID
             : widget.conversationId,
         isConversationId: !widget.conversationId.contains("null"),
+        cursor: _cursor,
       ),
     );
 
     context.read<MessageBloc>().add(StartListeningMessageEvent());
+
+    widget.scrollController.addListener(() {
+      if (widget.scrollController.position.pixels >
+          widget.scrollController.position.maxScrollExtent - 200) {
+        context.read<MessageBloc>().add(
+          LoadMoreMessageEvent(conversationId: widget.conversationId),
+        );
+      }
+    });
     super.initState();
   }
 
@@ -100,36 +118,45 @@ class _MessagePageState extends State<MessagePage> {
     return SystemBarsWrapper(
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        body: Column(
-          children: [
-            _buildHeader(mediaQuery, theme, textTheme),
-            Expanded(
-              child: MessageList(
-                onPressed: (id, content) {
-                  widget.messageFocusNode.unfocus();
-                  showMessageOptions(context, id, content);
-                },
+        body: BlocListener<MessageBloc, MessageState>(
+          listener: (context, state) {
+            if (state is MessageStateLoaded) {
+              _cursor = state.cursor;
+              _isLoading = false;
+            }
+          },
+          child: Column(
+            children: [
+              _buildHeader(mediaQuery, theme, textTheme),
+              Expanded(
+                child: MessageList(
+                  scrollController: widget.scrollController,
+                  onPressed: (id, content) {
+                    widget.messageFocusNode.unfocus();
+                    showMessageOptions(context, id, content);
+                  },
+                ),
               ),
-            ),
 
-            BlocListener<MessageBoxCubit, MessageBoxCubitState>(
-              listener: (context, state) => _messageBoxCubitState = state,
-              child: MessageBox(
-                onSendButtonPressed: () {
-                  if (!_messageBoxCubitState.isEditing) {
-                    sendMessage();
-                  } else {
-                    updateMessage();
-                  }
-                  widget.messageController.text = "";
-                },
-                onPickButtonPressed: () {},
-                messageBoxController: widget.messageController,
-                messageFocusNode: widget.messageFocusNode,
+              BlocListener<MessageBoxCubit, MessageBoxCubitState>(
+                listener: (context, state) => _messageBoxCubitState = state,
+                child: MessageBox(
+                  onSendButtonPressed: () {
+                    if (!_messageBoxCubitState.isEditing) {
+                      sendMessage();
+                    } else {
+                      updateMessage();
+                    }
+                    widget.messageController.text = "";
+                  },
+                  onPickButtonPressed: () {},
+                  messageBoxController: widget.messageController,
+                  messageFocusNode: widget.messageFocusNode,
+                ),
               ),
-            ),
-            SizedBox(height: mediaQuery.padding.bottom),
-          ],
+              SizedBox(height: mediaQuery.padding.bottom),
+            ],
+          ),
         ),
       ),
     );
@@ -149,7 +176,12 @@ class _MessagePageState extends State<MessagePage> {
       child: Row(
         spacing: 10,
         children: [
-          SynqIconButton(icon: Icons.chevron_left, onPressed: () {}),
+          SynqIconButton(
+            icon: Icons.chevron_left,
+            onPressed: () {
+              context.pop();
+            },
+          ),
           Row(
             spacing: 10,
             children: [
@@ -201,41 +233,43 @@ void showMessageOptions(BuildContext context, String id, String content) {
     useRootNavigator: true,
     context: context,
     builder: (context) {
-      return AnimatedPadding(
-        padding: EdgeInsets.only(
-          left: 10,
-          right: 10,
-          top: 10,
-          bottom: MediaQuery.of(context).padding.bottom,
-        ),
-        duration: Duration(milliseconds: 150),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text("This is message options/"),
-            SizedBox(height: 30),
-            SynqContainer(
-              onPressed: () {
-                context.read<MessageBoxCubit>().startEditing(id, content);
-                Navigator.pop(context);
-              },
-              backgroundColor: theme.cardColor,
-              height: 40,
-              child: Center(child: Text("Edit Message")),
-            ),
-            SizedBox(height: 10),
+      return SafeArea(
+        child: AnimatedPadding(
+          padding: EdgeInsets.only(
+            left: 10,
+            right: 10,
+            top: 10,
+            // bottom: MediaQuery.of(context).padding.bottom,
+          ),
+          duration: Duration(milliseconds: 150),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("This is message options/"),
+              SizedBox(height: 30),
+              SynqContainer(
+                onPressed: () {
+                  context.read<MessageBoxCubit>().startEditing(id, content);
+                  Navigator.pop(context);
+                },
+                backgroundColor: theme.cardColor,
+                height: 40,
+                child: Center(child: Text("Edit Message")),
+              ),
+              SizedBox(height: 10),
 
-            SynqContainer(
-              onPressed: () {
-                context.read<MessageBloc>().add(DeleteMessage(id: id));
-                Navigator.pop(context);
-              },
-              backgroundColor: Colors.redAccent,
-              height: 40,
-              child: Center(child: Text("Delete")),
-            ),
-            SizedBox(height: 20),
-          ],
+              SynqContainer(
+                onPressed: () {
+                  context.read<MessageBloc>().add(DeleteMessage(id: id));
+                  Navigator.pop(context);
+                },
+                backgroundColor: Colors.redAccent,
+                height: 40,
+                child: Center(child: Text("Delete")),
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
         ),
       );
     },

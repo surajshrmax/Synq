@@ -27,7 +27,7 @@ class ConversationListItem extends StatelessWidget {
     return SynqContainer(
       onPressed: () => onPressed!(),
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       borderColor: theme.scaffoldBackgroundColor,
       child: Row(
         spacing: 10.r,

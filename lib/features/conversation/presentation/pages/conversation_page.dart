@@ -51,7 +51,7 @@ class _ConversationPageState extends State<ConversationPage> {
                             ),
                             title: user!.profile!.name!,
                             subtitle:
-                                "${conversation.id == lastMessage!.senderId ? "You: " : ""}${lastMessage.content}",
+                                "${conversation.user!.id != lastMessage!.senderId ? "You: " : ""}${lastMessage.content}",
                             date: "${lastMessage.sendAt!.day.toString()} Jan",
                             unreads: 1,
                           );

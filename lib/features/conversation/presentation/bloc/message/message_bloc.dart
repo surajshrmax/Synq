@@ -18,6 +18,9 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   final List<StreamSubscription> _subs = [];
 
   List<MessageModel> _messages = [];
+  String _conversationId = "";
+  String _cursor = "null";
+  bool _isLoading = false;
   MessageBloc({
     required this.getAllMessagesUseCase,
     required this.sendMessageUseCase,
@@ -35,6 +38,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     on<MessageDeleteEvent>(_onMessageDeleteEvent);
     on<UpdateMessage>(_onUpdateMessage);
     on<MessageUpdateEvent>(_onMessageUpdateEvent);
+    on<LoadMoreMessageEvent>(_loadMoreMessageEvent);
   }
 
   Future<void> _onGetAllMessagesEvent(
@@ -46,13 +50,37 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     var response = await getAllMessagesUseCase.call(
       event.conversationId,
       event.isConversationId,
-      "null",
+      event.cursor,
     );
 
     response.when(
       success: (data) {
         _messages = data.messages;
-        emit(MessageStateLoaded(messages: data.messages));
+        _cursor = data.cursor;
+        emit(MessageStateLoaded(messages: data.messages, cursor: data.cursor));
+      },
+      failure: (error) {},
+    );
+  }
+
+  Future<void> _loadMoreMessageEvent(
+    LoadMoreMessageEvent event,
+    Emitter<MessageState> emit,
+  ) async {
+    if (_isLoading || _cursor.contains("null")) return;
+    _isLoading = true;
+    var response = await getAllMessagesUseCase.call(
+      event.conversationId,
+      true,
+      _cursor,
+    );
+    _isLoading = false;
+
+    response.when(
+      success: (data) {
+        _messages.addAll(data.messages);
+        _cursor = data.cursor;
+        emit(MessageStateMoreItemsLoaded(messages: data.messages));
       },
       failure: (error) {},
     );
