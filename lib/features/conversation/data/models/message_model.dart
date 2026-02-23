@@ -8,6 +8,7 @@ class MessageModel {
   final ReplyMessage? reply;
   final UserModel? sender;
   final String? senderId;
+  final String? serverTime;
   final DateTime? sendAt;
 
   MessageModel({
@@ -18,6 +19,7 @@ class MessageModel {
     required this.reply,
     required this.sender,
     required this.senderId,
+    required this.serverTime,
     required this.sendAt,
   });
 
@@ -32,6 +34,7 @@ class MessageModel {
           : null,
       sender: UserModel.fromJson(json['sender']),
       senderId: json['senderId'],
+      serverTime: json['sentAt'],
       sendAt: DateTime.parse(json['sentAt']),
     );
   }
@@ -40,9 +43,20 @@ class MessageModel {
 class ReplyMessage {
   final String id;
   final String content;
+  final String serverTime;
+  final DateTime sentAt;
 
-  ReplyMessage({required this.id, required this.content});
+  ReplyMessage({
+    required this.id,
+    required this.content,
+    required this.serverTime,
+    required this.sentAt,
+  });
 
-  factory ReplyMessage.fromJson(Map<String, dynamic> json) =>
-      ReplyMessage(id: json['id'], content: json['content']);
+  factory ReplyMessage.fromJson(Map<String, dynamic> json) => ReplyMessage(
+    id: json['id'],
+    serverTime: json['sentAt'],
+    content: json['content'],
+    sentAt: DateTime.parse(json['sentAt']),
+  );
 }

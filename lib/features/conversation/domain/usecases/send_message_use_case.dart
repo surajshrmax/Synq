@@ -6,8 +6,4 @@ class SendMessageUseCase {
   final MessageRepository repository;
 
   SendMessageUseCase({required this.repository});
-
-  Future<ApiResult<String>> call(String id, IdType type, String content) async {
-    return repository.sendMessage(id, type, content);
-  }
 }

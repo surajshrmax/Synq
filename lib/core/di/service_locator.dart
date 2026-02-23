@@ -22,10 +22,15 @@ import 'package:synq/features/conversation/domain/repository/message_repository.
 import 'package:synq/features/conversation/domain/repository/user_repository.dart';
 import 'package:synq/features/conversation/domain/usecases/get_all_conversation_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_all_messages_use_case.dart';
+import 'package:synq/features/conversation/domain/usecases/get_initial_messages_use_case.dart';
+import 'package:synq/features/conversation/domain/usecases/get_messages_around_message_use_case.dart';
+import 'package:synq/features/conversation/domain/usecases/get_newer_messages_use_case.dart';
+import 'package:synq/features/conversation/domain/usecases/get_older_messages_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_user_info_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/search_user_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/send_message_use_case.dart';
 import 'package:synq/features/conversation/presentation/bloc/conversation/conversation_bloc.dart';
+import 'package:synq/features/conversation/presentation/bloc/message-re-write/message_re_write_bloc.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_bloc.dart';
 import 'package:synq/features/conversation/presentation/bloc/search/search_user_bloc.dart';
 import 'package:synq/features/conversation/presentation/bloc/user/user_bloc.dart';
@@ -123,6 +128,39 @@ void setUpDI() {
       getAllMessagesUseCase: getIt<GetAllMessagesUseCase>(),
       sendMessageUseCase: getIt<SendMessageUseCase>(),
       connection: MessageConnection(),
+    ),
+  );
+
+  //message-re-write
+  getIt.registerLazySingleton<GetInitialMessagesUseCase>(
+    () => GetInitialMessagesUseCase(
+      messageRepository: getIt<MessageRepository>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<GetOlderMessagesUseCase>(
+    () =>
+        GetOlderMessagesUseCase(messageRepository: getIt<MessageRepository>()),
+  );
+
+  getIt.registerLazySingleton<GetMessagesAroundMessageUseCase>(
+    () => GetMessagesAroundMessageUseCase(
+      messageRepository: getIt<MessageRepository>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<GetNewerMessagesUseCase>(
+    () =>
+        GetNewerMessagesUseCase(messageRepository: getIt<MessageRepository>()),
+  );
+
+  getIt.registerFactory<MessageReWriteBloc>(
+    () => MessageReWriteBloc(
+      initialMessagesUseCase: getIt<GetInitialMessagesUseCase>(),
+      olderMessagesUseCase: getIt<GetOlderMessagesUseCase>(),
+      messagesAroundMessageUseCase: getIt<GetMessagesAroundMessageUseCase>(),
+      newerMessagesUseCase: getIt<GetNewerMessagesUseCase>(),
+      messageConnection: getIt<MessageConnection>(),
     ),
   );
 }

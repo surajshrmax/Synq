@@ -5,6 +5,7 @@ import 'package:synq/features/auth/presentation/pages/welcome_page.dart';
 import 'package:synq/features/conversation/presentation/pages/conversation_page.dart';
 import 'package:synq/features/conversation/presentation/pages/find_user_page.dart';
 import 'package:synq/features/conversation/presentation/pages/message_page.dart';
+import 'package:synq/features/conversation/presentation/pages/message_re_write_page.dart';
 import 'package:synq/splash_screen.dart';
 
 final routes = GoRouter(
@@ -23,7 +24,7 @@ final routes = GoRouter(
       builder: (context, state) {
         final conversationId = state.pathParameters['conversationId'];
         final userID = state.pathParameters['userId'];
-        return MessagePage(conversationId: conversationId!, userID: userID!);
+        return MessageReWritePage(chatId: conversationId!, userId: userID!);
       },
     ),
   ],

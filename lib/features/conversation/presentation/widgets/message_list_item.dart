@@ -11,6 +11,7 @@ class MessageListItem extends StatelessWidget {
   final MessageModel message;
   final bool showTime;
   final Function(DismissDirection direction) onDrag;
+  final Function(String id, String sentAt)? onReplyClicked;
   final int index;
   const MessageListItem({
     super.key,
@@ -19,6 +20,7 @@ class MessageListItem extends StatelessWidget {
     this.showTime = false,
     required this.onDrag,
     required this.index,
+    this.onReplyClicked,
   });
 
   @override
@@ -63,28 +65,34 @@ class MessageListItem extends StatelessWidget {
               spacing: 10,
               children: [
                 message.reply != null
-                    ? Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Row(
-                          spacing: 10,
-                          children: [
-                            Icon(
-                              Icons.reply,
-                              size: 14,
-                              color: textTheme?.secondaryTextColor,
-                            ),
-                            Expanded(
-                              child: Text(
-                                message.reply!.content,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: textTheme?.secondaryTextColor,
+                    ? GestureDetector(
+                        onTap: () => onReplyClicked!(
+                          message.replyMessageId!,
+                          message.reply!.serverTime,
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            spacing: 10,
+                            children: [
+                              Icon(
+                                Icons.reply,
+                                size: 14,
+                                color: textTheme?.secondaryTextColor,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  message.reply!.content,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: textTheme?.secondaryTextColor,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       )
                     : SizedBox(),

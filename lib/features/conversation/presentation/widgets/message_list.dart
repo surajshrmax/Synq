@@ -24,7 +24,21 @@ class _MessageListState extends State<MessageList> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey();
   final List<MessageModel> _messages = [];
 
-  void addMultipleMessage(List<MessageModel> newMessages, String _cursor) {
+  void insertItem(MessageModel message) {
+    final index = _messages.indexWhere(
+      (m) => m.sendAt!.isAfter(message.sendAt!),
+    );
+
+    if (index != -1) {
+      _messages.insert(index, message);
+      _listKey.currentState!.insertItem(index);
+    } else {
+      _messages.add(message);
+      _listKey.currentState!.insertItem(_messages.indexOf(message));
+    }
+  }
+
+  void addMultipleMessage(List<MessageModel> newMessages) {
     final existingIds = _messages.map((e) => e.id).toSet();
 
     final incoming = newMessages
@@ -32,8 +46,7 @@ class _MessageListState extends State<MessageList> {
         .toList();
 
     for (int i = 0; i < incoming.length; i++) {
-      _messages.insert(0, incoming[i]);
-      _listKey.currentState!.insertItem(0);
+      insertItem(incoming[i]);
     }
   }
 
@@ -89,9 +102,8 @@ class _MessageListState extends State<MessageList> {
       listener: (context, state) => switch (state) {
         MessageStateLoaded() => addMultipleMessage(
           state.messages.reversed.toList(),
-          state.cursor,
         ),
-        MessageStateMoreItemsLoaded() => onMoreItemsLoaded(state.messages),
+        MessageStateMoreItemsLoaded() => addMultipleMessage(state.messages),
         MessageStateNewMessage() => addSingleMessage(state.message),
         MessageStateRemoved() => removeMessage(state.message),
         MessageStateUpdated() => updateMessage(state.index, state.message),

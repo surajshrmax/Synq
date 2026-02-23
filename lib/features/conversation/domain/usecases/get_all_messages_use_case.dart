@@ -10,8 +10,14 @@ class GetAllMessagesUseCase {
   Future<ApiResult<MessageResponse>> call(
     String conversationId,
     bool isConversationId,
+    bool isAfter,
     String cursor,
   ) async {
-    return await messageRepository.getMessages(conversationId, isConversationId,cursor);
+    return await messageRepository.getMessages(
+      conversationId,
+      isConversationId,
+      isAfter,
+      cursor,
+    );
   }
 }

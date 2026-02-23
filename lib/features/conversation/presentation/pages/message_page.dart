@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/core/widgets/synq_container.dart';
@@ -69,6 +70,7 @@ class _MessagePageState extends State<MessagePage> {
         );
       }
     });
+
     super.initState();
   }
 

@@ -22,6 +22,8 @@ class ConversationModel {
         title: json['title'],
         isGroup: json['isGroup'],
         user: UserModel.fromJson(json['user']),
-        lastMessage: MessageModel.fromJson(json["lastMessage"]),
+        lastMessage: json['lastMessage'] == null
+            ? null
+            : MessageModel.fromJson(json["lastMessage"]),
       );
 }

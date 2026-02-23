@@ -50,14 +50,15 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     var response = await getAllMessagesUseCase.call(
       event.conversationId,
       event.isConversationId,
+      false,
       event.cursor,
     );
 
     response.when(
       success: (data) {
         _messages = data.messages;
-        _cursor = data.cursor;
-        emit(MessageStateLoaded(messages: data.messages, cursor: data.cursor));
+        _cursor = data.beforeCursor!;
+        emit(MessageStateLoaded(messages: data.messages, cursor: data.beforeCursor!));
       },
       failure: (error) {},
     );
@@ -72,6 +73,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     var response = await getAllMessagesUseCase.call(
       event.conversationId,
       true,
+      true,
       _cursor,
     );
     _isLoading = false;
@@ -79,7 +81,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     response.when(
       success: (data) {
         _messages.addAll(data.messages);
-        _cursor = data.cursor;
+        _cursor = data.beforeCursor!;
         emit(MessageStateMoreItemsLoaded(messages: data.messages));
       },
       failure: (error) {},

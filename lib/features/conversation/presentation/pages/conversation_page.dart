@@ -50,9 +50,12 @@ class _ConversationPageState extends State<ConversationPage> {
                               "/message/${conversation.id}/${user.id}",
                             ),
                             title: user!.profile!.name!,
-                            subtitle:
-                                "${conversation.user!.id != lastMessage!.senderId ? "You: " : ""}${lastMessage.content}",
-                            date: "${lastMessage.sendAt!.day.toString()} Jan",
+                            subtitle: conversation.lastMessage == null
+                                ? "Tap to start conversation"
+                                : "${conversation.user!.id != lastMessage!.senderId ? "You: " : ""}${lastMessage.content}",
+                            date: lastMessage == null
+                                ? ""
+                                : "${lastMessage!.sendAt!.day.toString()} Jan",
                             unreads: 1,
                           );
                         },
