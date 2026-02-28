@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:signalr_netcore/http_connection_options.dart';
-import 'package:signalr_netcore/hub_connection.dart';
-import 'package:signalr_netcore/hub_connection_builder.dart';
+import 'package:logging/logging.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 import 'package:synq/config/constants.dart';
 import 'package:synq/features/conversation/data/data_source/remote/message_api_service.dart';
 import 'package:synq/features/conversation/data/models/message_model.dart';
+import 'package:synq/features/conversation/data/models/typing_status_model.dart';
 
 class MessageConnection {
   late HubConnection hubConnection;
@@ -23,6 +22,10 @@ class MessageConnection {
       StreamController.broadcast();
   Stream<MessageModel> get updates => _updateMessageController.stream;
 
+  final StreamController<TypingStatusModel> _typingController =
+      StreamController.broadcast();
+  Stream<TypingStatusModel> get typings => _typingController.stream;
+
   Future<void> buildConnection(Future<String?> token) async {
     hubConnection = HubConnectionBuilder()
         .withUrl(
@@ -37,25 +40,14 @@ class MessageConnection {
 
   Future<void> startConnection() async {
     hubConnection.onclose(({error}) {
+      print("Closing connection");
       print(error);
     });
 
     hubConnection.on("RecieveMessage", (args) {
-      print("GETTING MESSAGE FROM SERVER");
       if (args != null && args.isNotEmpty) {
-        final dynamic raw = args[0];
-
-        MessageModel message;
-
-        if (raw is Map<String, dynamic>) {
-          message = MessageModel.fromJson(raw);
-        } else if (raw is String) {
-          message = MessageModel.fromJson(jsonDecode(raw));
-        } else {
-          print('unknown message type');
-          return;
-        }
-
+        final Map<String, dynamic> raw = args[0] as Map<String, dynamic>;
+        final message = MessageModel.fromJson(raw);
         _newMessageController.add(message);
       }
     });
@@ -63,7 +55,6 @@ class MessageConnection {
     hubConnection.on("MessageDeleted", (args) {
       if (args != null && args.isNotEmpty) {
         final dynamic id = args[0];
-        print("GOT SOMETHING TO DELETE $id");
         _deleteMessageController.add(id);
       }
     });
@@ -106,6 +97,12 @@ class MessageConnection {
 
         _updateMessageController.add(message);
       }
+    });
+
+    hubConnection.on("Typing", (args) {
+      _typingController.add(
+        TypingStatusModel.fromJson(args![0] as Map<String, dynamic>),
+      );
     });
 
     try {

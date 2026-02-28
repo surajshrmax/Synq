@@ -5,11 +5,43 @@ import 'package:synq/features/conversation/domain/usecases/get_initial_messages_
 import 'package:synq/features/conversation/domain/usecases/get_messages_around_message_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_newer_messages_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_older_messages_use_case.dart';
+import 'package:synq/features/conversation/domain/usecases/send_message_use_case.dart';
+import 'package:synq/features/conversation/domain/usecases/update_typing_status_use_case.dart';
 
 class MessageApiService {
   final ApiClient apiClient;
 
   MessageApiService({required this.apiClient});
+
+  Future<void> sendMessage(SendMessageParams params) async {
+    await apiClient.post(
+      "/messages",
+      data: {
+        "id": params.id,
+        "isChat": params.isChat,
+        "content": params.content,
+        "replyToMessageId": params.replyToMessageId,
+      },
+    );
+  }
+
+  Future<void> deleteMessage(String messageId) async {
+    await apiClient.delete("/messages", data: {"messageId": messageId});
+  }
+
+  Future<void> updateMessage(String messageId, String content) async {
+    await apiClient.patch("/messages", {
+      "messageId": messageId,
+      "content": content,
+    });
+  }
+
+  Future<void> updateTypingStatus(UpdateTypingStatusParams params) async {
+    await apiClient.post(
+      "/messages/typing",
+      data: {"chatId": params.chatId, "isTyping": params.isTyping},
+    );
+  }
 
   Future<ApiResult<MessageResponse>> getAllMessages(
     String conversationId,

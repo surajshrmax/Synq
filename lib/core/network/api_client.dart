@@ -5,7 +5,7 @@ abstract class ApiClient {
     String path, {
     Map<String, dynamic>? queryParameters,
     Map<String, String>? headers,
-    T Function(dynamic json)? mapper
+    T Function(dynamic json)? mapper,
   });
 
   Future<ApiResult<T>> post<T>(
@@ -21,8 +21,10 @@ abstract class ApiClient {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Map<String, String>? headers,
-    T Function(dynamic json)? mapper
+    T Function(dynamic json)? mapper,
   });
+
+  Future<ApiResult<T>> patch<T>(String path, dynamic data);
 
   Future<ApiResult<T>> delete<T>(
     String path, {

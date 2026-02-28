@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
@@ -10,6 +9,11 @@ import 'package:synq/features/conversation/presentation/bloc/message-re-write/me
 import 'package:synq/features/conversation/presentation/bloc/message-re-write/message_re_write_event.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit_state.dart';
+import 'package:synq/features/conversation/presentation/bloc/typing/typing_cubit.dart';
+import 'package:synq/features/conversation/presentation/bloc/typing/typing_cubit_state.dart';
+import 'package:synq/features/conversation/presentation/bloc/user/user_bloc.dart';
+import 'package:synq/features/conversation/presentation/bloc/user/user_event.dart';
+import 'package:synq/features/conversation/presentation/bloc/user/user_state.dart';
 import 'package:synq/features/conversation/presentation/widgets/message_box.dart';
 import 'package:synq/features/conversation/presentation/widgets/message_re_write_list.dart';
 import 'package:synq/system_bars_wrapper.dart';
@@ -30,7 +34,6 @@ class MessageReWritePage extends StatefulWidget {
 
 class _MessageReWritePageState extends State<MessageReWritePage> {
   final TextEditingController messageBoxController = TextEditingController();
-  // final ScrollController messageScrollController = ScrollController();
   final ItemScrollController messageScrollController = ItemScrollController();
   final ItemPositionsListener messageItemPositionListener =
       ItemPositionsListener.create();
@@ -42,6 +45,7 @@ class _MessageReWritePageState extends State<MessageReWritePage> {
 
   @override
   void initState() {
+    context.read<UserBloc>().add(GetUserInfoEvent(userId: widget.userId));
     context.read<MessageReWriteBloc>().add(
       LoadInitialMessages(
         chatId: widget.chatId.contains("null") ? widget.userId : widget.chatId,
@@ -54,6 +58,7 @@ class _MessageReWritePageState extends State<MessageReWritePage> {
   }
 
   void sendMessage() {
+    bool isChatId = !widget.chatId.contains("null");
     if (messageBoxCubitState.isEditing) {
       context.read<MessageReWriteBloc>().add(
         UpdateMessage(
@@ -65,6 +70,8 @@ class _MessageReWritePageState extends State<MessageReWritePage> {
     } else if (messageBoxCubitState.isReplying) {
       context.read<MessageReWriteBloc>().add(
         SendMessage(
+          id: isChatId ? widget.chatId : widget.userId,
+          isChat: isChatId,
           content: messageBoxController.text,
           replyToMessageId: messageBoxCubitState.messageId,
         ),
@@ -72,7 +79,11 @@ class _MessageReWritePageState extends State<MessageReWritePage> {
       context.read<MessageBoxCubit>().clear();
     } else {
       context.read<MessageReWriteBloc>().add(
-        SendMessage(content: messageBoxController.text),
+        SendMessage(
+          id: isChatId ? widget.chatId : widget.userId,
+          isChat: isChatId,
+          content: messageBoxController.text,
+        ),
       );
     }
   }
@@ -80,9 +91,11 @@ class _MessageReWritePageState extends State<MessageReWritePage> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
+    final theme = Theme.of(context);
     return SystemBarsWrapper(
       child: Scaffold(
         body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: mediaQuery.padding.top),
             _buildHeader(context),
@@ -94,6 +107,28 @@ class _MessageReWritePageState extends State<MessageReWritePage> {
                   messageBoxFocusNode.unfocus();
                   showMessageOptions(context, messsage.id, messsage.content);
                 },
+              ),
+            ),
+            BlocBuilder<TypingCubit, TypingCubitState>(
+              buildWhen: (previous, current) =>
+                  previous.isTyping != current.isTyping,
+              builder: (context, state) => AnimatedSwitcher(
+                duration: Duration(milliseconds: 500),
+                child: state.isTyping
+                    ? Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 5,
+                          horizontal: 10,
+                        ),
+                        color: primaryColor.withAlpha(20),
+                        child: Text(
+                          "Dog is typing...",
+                          style: TextStyle(fontSize: 14, color: primaryColor),
+                        ),
+                      )
+                    : SizedBox(),
               ),
             ),
             BlocListener<MessageBoxCubit, MessageBoxCubitState>(
@@ -125,25 +160,53 @@ Widget _buildHeader(BuildContext context) {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       spacing: 40,
       children: [
-        Row(
-          children: [
-            Icon(Icons.chevron_left, color: primaryColor),
-            Text(
-              "back",
-              style: TextStyle(
-                fontSize: 14,
-                color: primaryColor,
-                fontWeight: FontWeight.bold,
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+          decoration: BoxDecoration(
+            color: primaryColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.chevron_left, size: 16, color: Colors.white),
+              Text(
+                "Back",
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        // Row(
+        //   children: [
+        //     Icon(Icons.chevron_left, color: primaryColor),
+        //     Text(
+        //       "back",
+        //       style: TextStyle(
+        //         fontSize: 14,
+        //         color: primaryColor,
+        //         fontWeight: FontWeight.bold,
+        //       ),
+        //     ),
+        //   ],
+        // ),
         Row(
           spacing: 10,
           children: [
-            Text(
-              "Dog",
-              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 17),
+            BlocBuilder<UserBloc, UserState>(
+              builder: (context, state) {
+                return state is UserStateInfoLoaded
+                    ? Text(
+                        state.user.profile!.name!,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 17,
+                        ),
+                      )
+                    : SizedBox();
+              },
             ),
             Text("/", style: TextStyle(fontSize: 25)),
             Row(

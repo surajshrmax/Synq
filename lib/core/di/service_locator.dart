@@ -20,6 +20,7 @@ import 'package:synq/features/conversation/data/repository/user_repository_impl.
 import 'package:synq/features/conversation/domain/repository/conversation_repository.dart';
 import 'package:synq/features/conversation/domain/repository/message_repository.dart';
 import 'package:synq/features/conversation/domain/repository/user_repository.dart';
+import 'package:synq/features/conversation/domain/usecases/delete_message_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_all_conversation_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_all_messages_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_initial_messages_use_case.dart';
@@ -29,10 +30,13 @@ import 'package:synq/features/conversation/domain/usecases/get_older_messages_us
 import 'package:synq/features/conversation/domain/usecases/get_user_info_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/search_user_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/send_message_use_case.dart';
+import 'package:synq/features/conversation/domain/usecases/update_message_use_case.dart';
+import 'package:synq/features/conversation/domain/usecases/update_typing_status_use_case.dart';
 import 'package:synq/features/conversation/presentation/bloc/conversation/conversation_bloc.dart';
 import 'package:synq/features/conversation/presentation/bloc/message-re-write/message_re_write_bloc.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_bloc.dart';
 import 'package:synq/features/conversation/presentation/bloc/search/search_user_bloc.dart';
+import 'package:synq/features/conversation/presentation/bloc/typing/typing_cubit.dart';
 import 'package:synq/features/conversation/presentation/bloc/user/user_bloc.dart';
 
 final getIt = GetIt.instance;
@@ -154,13 +158,36 @@ void setUpDI() {
         GetNewerMessagesUseCase(messageRepository: getIt<MessageRepository>()),
   );
 
+  getIt.registerLazySingleton<DeleteMessageUseCase>(
+    () => DeleteMessageUseCase(messageRepository: getIt<MessageRepository>()),
+  );
+
+  getIt.registerLazySingleton<UpdateMessageUseCase>(
+    () => UpdateMessageUseCase(messageRepository: getIt<MessageRepository>()),
+  );
+
   getIt.registerFactory<MessageReWriteBloc>(
     () => MessageReWriteBloc(
+      sendMessageUseCase: getIt<SendMessageUseCase>(),
+      deleteMessageUseCase: getIt<DeleteMessageUseCase>(),
+      updateMessageUseCase: getIt<UpdateMessageUseCase>(),
       initialMessagesUseCase: getIt<GetInitialMessagesUseCase>(),
       olderMessagesUseCase: getIt<GetOlderMessagesUseCase>(),
       messagesAroundMessageUseCase: getIt<GetMessagesAroundMessageUseCase>(),
       newerMessagesUseCase: getIt<GetNewerMessagesUseCase>(),
       messageConnection: getIt<MessageConnection>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<UpdateTypingStatusUseCase>(
+    () => UpdateTypingStatusUseCase(
+      messageRepository: getIt<MessageRepository>(),
+    ),
+  );
+  getIt.registerFactory<TypingCubit>(
+    () => TypingCubit(
+      messageConnection: getIt<MessageConnection>(),
+      updateTypingStatusUseCase: getIt<UpdateTypingStatusUseCase>(),
     ),
   );
 }

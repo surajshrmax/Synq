@@ -23,10 +23,17 @@ class LoadNewerMessages extends MessageReWriteEvent {}
 class StartConnection extends MessageReWriteEvent {}
 
 class SendMessage extends MessageReWriteEvent {
+  final String id;
+  final bool isChat;
   final String content;
   final String? replyToMessageId;
 
-  SendMessage({required this.content, this.replyToMessageId});
+  SendMessage({
+    required this.id,
+    required this.isChat,
+    required this.content,
+    this.replyToMessageId,
+  });
 }
 
 class UpdateMessage extends MessageReWriteEvent {

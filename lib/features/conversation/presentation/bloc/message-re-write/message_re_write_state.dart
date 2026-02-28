@@ -3,32 +3,17 @@ import 'package:synq/features/conversation/data/models/message_response.dart';
 
 class MessageReWriteState {}
 
+enum LoadedMessagesType { initial, old, newer, around }
+
 class MessageInitial extends MessageReWriteState {}
 
 class MessageLoading extends MessageReWriteState {}
 
 class MessageLoaded extends MessageReWriteState {
+  final LoadedMessagesType type;
   final List<MessageModel> messages;
 
-  MessageLoaded({required this.messages});
-}
-
-class OldMessagesLoaded extends MessageReWriteState {
-  final List<MessageModel> messages;
-
-  OldMessagesLoaded({required this.messages});
-}
-
-class MessagesAroundMessageLoaded extends MessageReWriteState {
-  final List<MessageModel> messages;
-
-  MessagesAroundMessageLoaded({required this.messages});
-}
-
-class NewerMessagesLoaded extends MessageReWriteState {
-  final List<MessageModel> messages;
-
-  NewerMessagesLoaded({required this.messages});
+  MessageLoaded({required this.type, required this.messages});
 }
 
 class MessageRecieved extends MessageReWriteState {

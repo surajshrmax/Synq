@@ -15,6 +15,7 @@ class SynqAnimatedContainer extends StatefulWidget {
   final EdgeInsets? padding;
   final double? height;
   final double? width;
+  final bool showBorder;
 
   const SynqAnimatedContainer({
     super.key,
@@ -30,6 +31,7 @@ class SynqAnimatedContainer extends StatefulWidget {
     this.height,
     this.width,
     this.borderColor,
+    this.showBorder = true,
   });
 
   @override
@@ -71,10 +73,12 @@ class _SynqAnimatedContainerState extends State<SynqAnimatedContainer> {
 
         decoration: BoxDecoration(
           color: widget.backgroundColor ?? theme.scaffoldBackgroundColor,
-          border: Border.all(
-            color: widget.borderColor ?? theme.dividerColor,
-            width: 2,
-          ),
+          border: widget.showBorder
+              ? Border.all(
+                  color: widget.borderColor ?? theme.dividerColor,
+                  width: 2,
+                )
+              : Border(),
           borderRadius:
               widget.borderRadius ??
               BorderRadius.circular(defaultBorderRadiusValue),

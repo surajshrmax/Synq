@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
+import 'package:synq/config/theme/app_theme.dart';
 import 'package:synq/core/widgets/synq_animated_container.dart';
 import 'package:synq/core/widgets/synq_container.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit_state.dart';
+import 'package:synq/features/conversation/presentation/bloc/typing/typing_cubit.dart';
 
 class MessageBox extends StatefulWidget {
   final VoidCallback onSendButtonPressed;
@@ -28,6 +32,8 @@ class MessageBox extends StatefulWidget {
 class _MessageBoxState extends State<MessageBox> {
   bool isTextBoxEmpty = true;
   bool isEditingMessage = false;
+  bool isTyping = false;
+  Timer? timer;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -40,6 +46,26 @@ class _MessageBoxState extends State<MessageBox> {
         isTextBoxEmpty = value;
       });
       widget.messageFocusNode.requestFocus();
+    }
+
+    void updateTypingStatus() {
+      if (!isTyping) {
+        isTyping = true;
+        context.read<TypingCubit>().setTypingStatus(
+          "5c5a353c-bff1-49ab-9302-e786bcc47518",
+          true,
+        );
+        if (timer != null) {
+          timer?.cancel();
+        }
+        timer = Timer(Duration(seconds: 2), () {
+          isTyping = false;
+          context.read<TypingCubit>().setTypingStatus(
+            "5c5a353c-bff1-49ab-9302-e786bcc47518",
+            false,
+          );
+        });
+      }
     }
 
     return BlocListener<MessageBoxCubit, MessageBoxCubitState>(
@@ -141,10 +167,12 @@ class _MessageBoxState extends State<MessageBox> {
                       keyboardType: TextInputType.multiline,
                       textCapitalization: TextCapitalization.sentences,
                       controller: widget.messageBoxController,
-                      onChanged: (value) =>
-                          widget.messageBoxController.text.isNotEmpty
-                          ? updateState(false)
-                          : updateState(true),
+                      onChanged: (value) {
+                        updateTypingStatus();
+                        widget.messageBoxController.text.isNotEmpty
+                            ? updateState(false)
+                            : updateState(true);
+                      },
                     ),
                   ),
                   AnimatedSize(
@@ -161,8 +189,9 @@ class _MessageBoxState extends State<MessageBox> {
                                 });
                                 widget.onSendButtonPressed();
                               },
-                              backgroundColor: Colors.lightGreenAccent,
+                              backgroundColor: primaryColor,
                               shadowOffSet: Offset.zero,
+                              showBorder: false,
                               borderRadius: BorderRadius.circular(40),
                               child:
                                   BlocBuilder<

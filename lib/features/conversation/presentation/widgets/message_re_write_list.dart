@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
@@ -31,6 +32,8 @@ class _MessageReWriteListState extends State<MessageReWriteList> {
   String? scrollToMessageId;
 
   int _lastMinIndex = 0;
+  int? firstVisibleIndex;
+  double? anchorOffset;
 
   @override
   void initState() {
@@ -61,9 +64,23 @@ class _MessageReWriteListState extends State<MessageReWriteList> {
     }
   }
 
+  void captureVisibleItem() {
+    final positions = widget.itemPositionsListener.itemPositions.value;
+
+    if (positions.isEmpty) return;
+
+    final min = positions.reduce(
+      (a, b) => a.itemLeadingEdge < b.itemLeadingEdge ? a : b,
+    );
+
+    firstVisibleIndex = min.index;
+    anchorOffset = min.itemLeadingEdge;
+  }
+
   void _handleScrollDown(int firstVisibleIndex) {
     if (firstVisibleIndex <= 3 && !_isLoading) {
       print("Time to load new messages");
+      captureVisibleItem();
       context.read<MessageReWriteBloc>().add(LoadNewerMessages());
     }
   }
@@ -75,24 +92,68 @@ class _MessageReWriteListState extends State<MessageReWriteList> {
     }
   }
 
-  void addInitialMessages(List<MessageModel> messages) {
-    _messages.clear();
-    _ids.clear();
-    messages.forEach((item) => _ids.add(item.id));
-    _messages.addAll(messages);
-  }
-
   void addOlderMessages(List<MessageModel> messages) {
     _isLoading = false;
-    for (final msg in messages) {
-      insertMessage(msg);
-    }
+    setState(() {
+      _messages.addAll(messages);
+    });
   }
 
   void addNewMessages(List<MessageModel> messages) {
     _isLoading = false;
     for (final msg in messages) {
-      insertMessage(msg);
+      setState(() {
+        insertMessage(msg);
+      });
+    }
+  }
+
+  void addMessages(LoadedMessagesType type, List<MessageModel> messages) {
+    if (type == LoadedMessagesType.initial ||
+        type == LoadedMessagesType.around) {
+      _messages.clear();
+      _ids.clear();
+      for (var item in messages) {
+        _ids.add(item.id);
+      }
+      setState(() {
+        if (type == LoadedMessagesType.around) {
+          _messages.addAll(messages.reversed);
+        } else {
+          _messages.addAll(messages);
+        }
+      });
+      if (scrollToMessageId != null) {
+        int index = _messages.indexWhere((m) => m.id == scrollToMessageId);
+        if (index != -1) {
+          widget.scrollController.jumpTo(index: index);
+        }
+      }
+    }
+
+    if (type == LoadedMessagesType.old) {
+      for (var msg in messages) {
+        setState(() {
+          insertMessage(msg);
+        });
+      }
+    }
+
+    if (type == LoadedMessagesType.newer) {
+      setState(() {
+        for (final msg in messages) {
+          insertMessage(msg);
+        }
+      });
+
+      if (firstVisibleIndex != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          widget.scrollController.jumpTo(
+            index: firstVisibleIndex! + messages.length,
+            alignment: anchorOffset ?? 0,
+          );
+        });
+      }
     }
   }
 
@@ -110,22 +171,6 @@ class _MessageReWriteListState extends State<MessageReWriteList> {
     } else {
       _messages.insert(index, message);
     }
-  }
-
-  void whatTheFuck(List<MessageModel> fucks) {
-    _ids.clear();
-    _messages.clear();
-    _messages.addAll(fucks);
-    // if (scrollToMessageId != null) {
-    //   int index = _messages.indexWhere((m) => m.id == scrollToMessageId);
-
-    //   if (index != -1) {
-    //     widget.scrollController.scrollTo(
-    //       index: index,
-    //       duration: Duration(milliseconds: 1000),
-    //     );
-    //   }
-    // }
   }
 
   void updateMessage(String id, MessageModel message) {
@@ -156,31 +201,23 @@ class _MessageReWriteListState extends State<MessageReWriteList> {
     return BlocListener<MessageReWriteBloc, MessageReWriteState>(
       listenWhen: (previous, current) =>
           current is MessageLoaded ||
-          current is OldMessagesLoaded ||
-          current is MessagesAroundMessageLoaded ||
-          current is NewerMessagesLoaded ||
           current is MessageRecieved ||
           current is MessageUpdated ||
           current is MessageRemoved,
-      listener: (context, state) => switch (state) {
-        MessageLoaded() => addInitialMessages(state.messages),
-        OldMessagesLoaded() => addOlderMessages(state.messages),
-        MessagesAroundMessageLoaded() => whatTheFuck(
-          state.messages.reversed.toList(),
-        ),
-        NewerMessagesLoaded() => addNewMessages(state.messages),
-        MessageRecieved() => _messages.insert(0, state.message),
-        MessageUpdated() => updateMessage(state.id, state.message),
-        MessageRemoved() => removeMessage(state.id),
-        MessageReWriteState() => throw UnimplementedError(),
+      listener: (context, state) {
+        return switch (state) {
+          MessageLoaded() => addMessages(state.type, state.messages),
+          MessageRecieved() => _messages.insert(0, state.message),
+          MessageUpdated() => updateMessage(state.id, state.message),
+          MessageRemoved() => removeMessage(state.id),
+          MessageReWriteState() => throw UnimplementedError(),
+        };
       },
       child: BlocBuilder<MessageReWriteBloc, MessageReWriteState>(
         buildWhen: (previous, current) =>
             current is MessageLoading ||
-            current is MessageLoaded ||
-            current is OldMessagesLoaded ||
-            current is MessagesAroundMessageLoaded ||
-            current is NewerMessagesLoaded ||
+            current is MessageLoaded &&
+                current.type == LoadedMessagesType.initial ||
             current is MessageRecieved ||
             current is MessageUpdated ||
             current is MessageRemoved ||
@@ -190,9 +227,6 @@ class _MessageReWriteListState extends State<MessageReWriteList> {
             return _buildLoading(textTheme);
           }
           if (state is MessageLoaded ||
-              state is OldMessagesLoaded ||
-              state is MessagesAroundMessageLoaded ||
-              state is NewerMessagesLoaded ||
               state is MessageRecieved ||
               state is MessageUpdated ||
               state is MessageRemoved) {

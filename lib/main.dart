@@ -12,6 +12,7 @@ import 'package:synq/features/conversation/presentation/bloc/message-re-write/me
 import 'package:synq/features/conversation/presentation/bloc/message/message_bloc.dart';
 import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit.dart';
 import 'package:synq/features/conversation/presentation/bloc/search/search_user_bloc.dart';
+import 'package:synq/features/conversation/presentation/bloc/typing/typing_cubit.dart';
 import 'package:synq/features/conversation/presentation/bloc/user/user_bloc.dart';
 
 void main() {
@@ -52,6 +53,7 @@ class MainApp extends StatelessWidget {
             BlocProvider(create: (_) => getIt<UserBloc>()),
             BlocProvider(create: (_) => MessageBoxCubit()),
             BlocProvider(create: (_) => getIt<MessageReWriteBloc>()),
+            BlocProvider(create: (_) => getIt<TypingCubit>()),
           ],
           child: MaterialApp.router(
             debugShowCheckedModeBanner: false,

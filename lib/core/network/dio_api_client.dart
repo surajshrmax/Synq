@@ -16,7 +16,7 @@ class DioApiClient implements ApiClient {
     Map<String, String>? headers,
   }) {
     return _request(
-      () => dio.request(
+      () => dio.delete(
         path,
         data: data,
         queryParameters: queryParameters,
@@ -59,6 +59,11 @@ class DioApiClient implements ApiClient {
       ),
       fromJson: mapper,
     );
+  }
+
+  @override
+  Future<ApiResult<T>> patch<T>(String path, data) {
+    return _request(() => dio.patch(path, data: data));
   }
 
   @override

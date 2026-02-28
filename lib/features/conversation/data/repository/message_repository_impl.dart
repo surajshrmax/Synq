@@ -6,11 +6,33 @@ import 'package:synq/features/conversation/domain/usecases/get_initial_messages_
 import 'package:synq/features/conversation/domain/usecases/get_messages_around_message_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_newer_messages_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_older_messages_use_case.dart';
+import 'package:synq/features/conversation/domain/usecases/send_message_use_case.dart';
+import 'package:synq/features/conversation/domain/usecases/update_typing_status_use_case.dart';
 
 class MessageRepositoryImpl extends MessageRepository {
   final MessageApiService apiService;
 
   MessageRepositoryImpl({required this.apiService});
+
+  @override
+  Future<void> sendMessage(SendMessageParams params) async {
+    await apiService.sendMessage(params);
+  }
+
+  @override
+  Future<void> deleteMessage(String messageId) async {
+    await apiService.deleteMessage(messageId);
+  }
+
+  @override
+  Future<void> updateMessage(String messageId, String content) async {
+    await apiService.updateMessage(messageId, content);
+  }
+
+  @override
+  Future<void> updateTypingStatus(UpdateTypingStatusParams params) async {
+    await apiService.updateTypingStatus(params);
+  }
 
   @override
   Future<ApiResult<MessageResponse>> getMessages(

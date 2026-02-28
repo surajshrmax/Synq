@@ -4,16 +4,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synq/core/di/service_locator.dart';
 import 'package:synq/core/storage/secure_storage.dart';
 import 'package:synq/features/conversation/data/connections/message_connection.dart';
-import 'package:synq/features/conversation/data/data_source/remote/message_api_service.dart';
+import 'package:synq/features/conversation/domain/usecases/delete_message_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_initial_messages_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_messages_around_message_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_newer_messages_use_case.dart';
 import 'package:synq/features/conversation/domain/usecases/get_older_messages_use_case.dart';
+import 'package:synq/features/conversation/domain/usecases/send_message_use_case.dart';
+import 'package:synq/features/conversation/domain/usecases/update_message_use_case.dart';
 import 'package:synq/features/conversation/presentation/bloc/message-re-write/message_re_write_event.dart';
 import 'package:synq/features/conversation/presentation/bloc/message-re-write/message_re_write_state.dart';
 
 class MessageReWriteBloc
     extends Bloc<MessageReWriteEvent, MessageReWriteState> {
+  final SendMessageUseCase sendMessageUseCase;
+  final DeleteMessageUseCase deleteMessageUseCase;
+  final UpdateMessageUseCase updateMessageUseCase;
+
   final GetInitialMessagesUseCase initialMessagesUseCase;
   final GetOlderMessagesUseCase olderMessagesUseCase;
   final GetMessagesAroundMessageUseCase messagesAroundMessageUseCase;
@@ -29,12 +35,17 @@ class MessageReWriteBloc
   bool hasMoreAfter = false;
 
   MessageReWriteBloc({
+    required this.sendMessageUseCase,
+    required this.deleteMessageUseCase,
+    required this.updateMessageUseCase,
     required this.initialMessagesUseCase,
     required this.olderMessagesUseCase,
     required this.messagesAroundMessageUseCase,
     required this.newerMessagesUseCase,
     required this.messageConnection,
   }) : super(MessageInitial()) {
+    _addAllListener();
+
     on<LoadInitialMessages>(_onLoadInitialMessageEvent);
     on<LoadOlderMessages>(_onLoadOlderMessagesEvent);
     on<LoadMessagesAroundMessage>(_onLoadMessagesAroundMessage);
@@ -48,8 +59,6 @@ class MessageReWriteBloc
     on<MessageEditedEvent>(_onMessageEditedEvent);
     on<MessageDeletedEvent>(_onMessageDeletedEvent);
     on<StartConnection>(_onStartConnection);
-
-    _addAllListener();
   }
 
   Future<void> _onLoadInitialMessageEvent(
@@ -67,7 +76,12 @@ class MessageReWriteBloc
         beforeCursor = data.beforeCursor;
         hasMoreBefore = data.hasMoreBefore;
         hasMoreAfter = data.hasMoreAfter;
-        emit(MessageLoaded(messages: data.messages));
+        emit(
+          MessageLoaded(
+            type: LoadedMessagesType.initial,
+            messages: data.messages,
+          ),
+        );
       },
       failure: (error) => emit(MessageError(error: error.message)),
     );
@@ -87,7 +101,9 @@ class MessageReWriteBloc
         beforeCursor = data.beforeCursor;
         hasMoreBefore = data.hasMoreBefore;
         hasMoreAfter = data.hasMoreAfter;
-        emit(OldMessagesLoaded(messages: data.messages));
+        emit(
+          MessageLoaded(type: LoadedMessagesType.old, messages: data.messages),
+        );
       },
       failure: (error) => emit(MessageError(error: error.message)),
     );
@@ -112,7 +128,12 @@ class MessageReWriteBloc
         afterCursor = data.afterCursor;
         beforeCursor = data.beforeCursor;
 
-        emit(MessagesAroundMessageLoaded(messages: data.messages));
+        emit(
+          MessageLoaded(
+            type: LoadedMessagesType.around,
+            messages: data.messages,
+          ),
+        );
       },
       failure: (error) => emit(MessageError(error: error.message)),
     );
@@ -131,7 +152,12 @@ class MessageReWriteBloc
       success: (data) {
         hasMoreAfter = data.hasMoreAfter;
         afterCursor = data.afterCursor;
-        emit(NewerMessagesLoaded(messages: data.messages));
+        emit(
+          MessageLoaded(
+            type: LoadedMessagesType.newer,
+            messages: data.messages,
+          ),
+        );
       },
       failure: (error) => emit(MessageError(error: error.message)),
     );
@@ -142,11 +168,13 @@ class MessageReWriteBloc
     Emitter<MessageReWriteState> emit,
   ) async {
     emit(MessageSending());
-    await messageConnection.sendMessage(
-      chatId,
-      IdType.conversation,
-      event.content,
-      event.replyToMessageId,
+    await sendMessageUseCase.call(
+      SendMessageParams(
+        id: event.id,
+        isChat: event.isChat,
+        content: event.content,
+        replyToMessageId: event.replyToMessageId,
+      ),
     );
   }
 
@@ -161,7 +189,7 @@ class MessageReWriteBloc
     UpdateMessage event,
     Emitter<MessageReWriteState> emit,
   ) async {
-    await messageConnection.updateMessage(event.id, event.content);
+    await updateMessageUseCase.call(event.id, event.content);
   }
 
   Future<void> _onMessageEditedEvent(
@@ -175,7 +203,7 @@ class MessageReWriteBloc
     DeleteMessage event,
     Emitter<MessageReWriteState> emit,
   ) async {
-    await messageConnection.deleteMessage(event.id);
+    await deleteMessageUseCase.call(event.id);
   }
 
   Future<void> _onMessageDeletedEvent(
@@ -196,9 +224,9 @@ class MessageReWriteBloc
 
   void _addAllListener() {
     subs.add(
-      messageConnection.messages.listen(
-        (event) => add(NewMessageRecieved(message: event)),
-      ),
+      messageConnection.messages.listen((event) {
+        add(NewMessageRecieved(message: event));
+      }),
     );
 
     subs.add(
