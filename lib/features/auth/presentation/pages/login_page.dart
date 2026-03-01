@@ -10,7 +10,7 @@ import 'package:synq/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:synq/features/auth/presentation/bloc/auth_event.dart';
 import 'package:synq/features/auth/presentation/bloc/auth_state.dart';
 import 'package:synq/features/auth/presentation/pages/register_page.dart';
-import 'package:synq/features/conversation/presentation/pages/conversation_page.dart';
+import 'package:synq/features/chat/presentation/pages/chat_page.dart';
 import 'package:synq/system_bars_wrapper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 

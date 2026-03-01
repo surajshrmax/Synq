@@ -7,13 +7,13 @@ import 'package:synq/config/theme/app_theme.dart';
 import 'package:synq/core/di/service_locator.dart';
 import 'package:synq/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:synq/features/conversation/presentation/bloc/conversation/conversation_bloc.dart';
-import 'package:synq/features/conversation/presentation/bloc/message-re-write/message_re_write_bloc.dart';
-import 'package:synq/features/conversation/presentation/bloc/message/message_bloc.dart';
-import 'package:synq/features/conversation/presentation/bloc/message/message_box_cubit.dart';
-import 'package:synq/features/conversation/presentation/bloc/search/search_user_bloc.dart';
-import 'package:synq/features/conversation/presentation/bloc/typing/typing_cubit.dart';
-import 'package:synq/features/conversation/presentation/bloc/user/user_bloc.dart';
+import 'package:synq/features/chat/presentation/bloc/chat/chat_bloc.dart';
+import 'package:synq/features/message/presentation/bloc/fab/fab_cubit.dart';
+import 'package:synq/features/message/presentation/bloc/message/message_bloc.dart';
+import 'package:synq/features/message/presentation/bloc/message-box/message_box_cubit.dart';
+import 'package:synq/features/chat/presentation/bloc/search/search_user_bloc.dart';
+import 'package:synq/features/message/presentation/bloc/typing/typing_cubit.dart';
+import 'package:synq/features/chat/presentation/bloc/user/user_bloc.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,12 +48,12 @@ class MainApp extends StatelessWidget {
             BlocProvider<SearchUserBloc>(
               create: (_) => getIt<SearchUserBloc>(),
             ),
-            BlocProvider(create: (_) => getIt<ConversationBloc>()),
-            BlocProvider(create: (_) => getIt<MessageBloc>()),
+            BlocProvider(create: (_) => getIt<ChatBloc>()),
             BlocProvider(create: (_) => getIt<UserBloc>()),
             BlocProvider(create: (_) => MessageBoxCubit()),
-            BlocProvider(create: (_) => getIt<MessageReWriteBloc>()),
+            BlocProvider(create: (_) => getIt<MessageBloc>()),
             BlocProvider(create: (_) => getIt<TypingCubit>()),
+            BlocProvider(create: (_) => FabCubit()),
           ],
           child: MaterialApp.router(
             debugShowCheckedModeBanner: false,

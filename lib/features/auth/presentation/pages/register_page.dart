@@ -11,7 +11,7 @@ import 'package:synq/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:synq/features/auth/presentation/bloc/auth_event.dart';
 import 'package:synq/features/auth/presentation/bloc/auth_state.dart';
 import 'package:synq/features/auth/presentation/widgets/login_textfield.dart';
-import 'package:synq/features/conversation/presentation/pages/conversation_page.dart';
+import 'package:synq/features/chat/presentation/pages/chat_page.dart';
 import 'package:synq/system_bars_wrapper.dart';
 
 class RegisterPage extends StatelessWidget {
