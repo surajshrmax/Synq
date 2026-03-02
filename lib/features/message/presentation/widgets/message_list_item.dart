@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/core/widgets/synq_container.dart';
 import 'package:synq/features/message/data/models/message_model.dart';
+import 'package:synq/features/user/presentation/widgets/profile_image.dart';
 
 class MessageListItem extends StatelessWidget {
   final VoidCallback onPressed;
@@ -99,12 +100,11 @@ class MessageListItem extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
+                    ProfileImage(
                       height: 40,
                       width: 40,
-                      child: ClipOval(
-                        child: Image.asset("assets/images/demo.jpg"),
-                      ),
+                      letter: message.sender!.profile!.name!.characters.first
+                          .toUpperCase(),
                     ),
                     Expanded(
                       child: Column(

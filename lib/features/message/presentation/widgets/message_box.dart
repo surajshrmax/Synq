@@ -7,6 +7,7 @@ import 'package:synq/config/theme/app_theme.dart';
 import 'package:synq/core/widgets/synq_animated_container.dart';
 import 'package:synq/core/widgets/synq_container.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:synq/features/message/presentation/bloc/chat-session/chat_session_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/message-box/message_box_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/message-box/message_box_cubit_state.dart';
 import 'package:synq/features/message/presentation/bloc/typing/typing_cubit.dart';
@@ -36,6 +37,7 @@ class _MessageBoxState extends State<MessageBox> {
   Timer? timer;
   @override
   Widget build(BuildContext context) {
+    final chatId = context.read<ChatSessionCubit>().state.chatId!;
     final theme = Theme.of(context);
     final textTheme = theme.extension<AppTextColors>();
     final MediaQueryData mediaQuery = MediaQuery.of(context);
@@ -51,19 +53,13 @@ class _MessageBoxState extends State<MessageBox> {
     void updateTypingStatus() {
       if (!isTyping) {
         isTyping = true;
-        context.read<TypingCubit>().setTypingStatus(
-          "5c5a353c-bff1-49ab-9302-e786bcc47518",
-          true,
-        );
+        context.read<TypingCubit>().setTypingStatus(chatId, true);
         if (timer != null) {
           timer?.cancel();
         }
         timer = Timer(Duration(seconds: 2), () {
           isTyping = false;
-          context.read<TypingCubit>().setTypingStatus(
-            "5c5a353c-bff1-49ab-9302-e786bcc47518",
-            false,
-          );
+          context.read<TypingCubit>().setTypingStatus(chatId, false);
         });
       }
     }

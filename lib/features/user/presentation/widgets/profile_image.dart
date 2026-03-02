@@ -29,7 +29,7 @@ class ProfileImage extends StatelessWidget {
           letter,
           style: TextStyle(
             // fontFamily: "Inter",
-            fontSize: height / 1.5,
+            fontSize: height / 1.8,
             color: textTheme?.secondaryTextColor,
             height: 1,
             fontWeight: FontWeight.bold,

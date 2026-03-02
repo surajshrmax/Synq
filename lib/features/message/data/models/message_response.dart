@@ -1,7 +1,7 @@
 import 'package:synq/features/message/data/models/message_model.dart';
 
 class MessageResponse {
-  final String conversationId;
+  final String chatId;
   final bool hasMoreAfter;
   final bool hasMoreBefore;
   final String? beforeCursor;
@@ -9,7 +9,7 @@ class MessageResponse {
   final List<MessageModel> messages;
 
   MessageResponse({
-    required this.conversationId,
+    required this.chatId,
     required this.hasMoreAfter,
     required this.hasMoreBefore,
     required this.messages,
@@ -19,7 +19,7 @@ class MessageResponse {
 
   factory MessageResponse.fromJson(Map<String, dynamic> json) =>
       MessageResponse(
-        conversationId: json['chatId'],
+        chatId: json['chatId'],
         hasMoreAfter: json['hasMoreAfter'],
         hasMoreBefore: json['hasMoreBefore'],
         beforeCursor: json['beforeCursor'],

@@ -32,6 +32,7 @@ import 'package:synq/features/message/domain/usecases/send_message_use_case.dart
 import 'package:synq/features/message/domain/usecases/update_message_use_case.dart';
 import 'package:synq/features/message/domain/usecases/update_typing_status_use_case.dart';
 import 'package:synq/features/chat/presentation/bloc/chat/chat_bloc.dart';
+import 'package:synq/features/message/presentation/bloc/chat-session/chat_session_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_bloc.dart';
 import 'package:synq/features/chat/presentation/bloc/search/search_user_bloc.dart';
 import 'package:synq/features/message/presentation/bloc/typing/typing_cubit.dart';
@@ -155,8 +156,11 @@ void setUpDI() {
     () => UpdateMessageUseCase(messageRepository: getIt<MessageRepository>()),
   );
 
+  getIt.registerFactory<ChatSessionCubit>(() => ChatSessionCubit());
+
   getIt.registerFactory<MessageBloc>(
     () => MessageBloc(
+      chatSession: getIt<ChatSessionCubit>(),
       sendMessageUseCase: getIt<SendMessageUseCase>(),
       deleteMessageUseCase: getIt<DeleteMessageUseCase>(),
       updateMessageUseCase: getIt<UpdateMessageUseCase>(),

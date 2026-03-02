@@ -8,6 +8,7 @@ import 'package:synq/core/di/service_locator.dart';
 import 'package:synq/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:synq/features/chat/presentation/bloc/chat/chat_bloc.dart';
+import 'package:synq/features/message/presentation/bloc/chat-session/chat_session_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/fab/fab_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_bloc.dart';
 import 'package:synq/features/message/presentation/bloc/message-box/message_box_cubit.dart';
@@ -51,6 +52,9 @@ class MainApp extends StatelessWidget {
             BlocProvider(create: (_) => getIt<ChatBloc>()),
             BlocProvider(create: (_) => getIt<UserBloc>()),
             BlocProvider(create: (_) => MessageBoxCubit()),
+            BlocProvider<ChatSessionCubit>(
+              create: (_) => getIt<ChatSessionCubit>(),
+            ),
             BlocProvider(create: (_) => getIt<MessageBloc>()),
             BlocProvider(create: (_) => getIt<TypingCubit>()),
             BlocProvider(create: (_) => FabCubit()),

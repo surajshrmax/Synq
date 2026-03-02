@@ -6,6 +6,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/config/theme/app_theme.dart';
 import 'package:synq/core/widgets/synq_container.dart';
+import 'package:synq/features/message/presentation/bloc/chat-session/chat_session_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/fab/fab_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_bloc.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_event.dart';
@@ -44,6 +45,9 @@ class _MessagePageState extends State<MessagePage> {
 
   @override
   void initState() {
+    if (!widget.chatId.contains("null")) {
+      context.read<ChatSessionCubit>().updateChatSession(chatId: widget.chatId);
+    }
     context.read<UserBloc>().add(GetUserInfoEvent(userId: widget.userId));
     context.read<MessageBloc>().add(
       LoadInitialMessages(

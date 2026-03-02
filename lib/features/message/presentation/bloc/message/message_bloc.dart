@@ -11,6 +11,7 @@ import 'package:synq/features/message/domain/usecases/get_newer_messages_use_cas
 import 'package:synq/features/message/domain/usecases/get_older_messages_use_case.dart';
 import 'package:synq/features/message/domain/usecases/send_message_use_case.dart';
 import 'package:synq/features/message/domain/usecases/update_message_use_case.dart';
+import 'package:synq/features/message/presentation/bloc/chat-session/chat_session_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_event.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_state.dart';
 
@@ -27,11 +28,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   final MessageConnection messageConnection;
   final List<StreamSubscription> subs = [];
 
-  String chatId = "";
-  String? beforeCursor;
-  String? afterCursor;
-  bool hasMoreBefore = false;
-  bool hasMoreAfter = false;
+  final ChatSessionCubit chatSession;
 
   MessageBloc({
     required this.sendMessageUseCase,
@@ -42,6 +39,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     required this.messagesAroundMessageUseCase,
     required this.newerMessagesUseCase,
     required this.messageConnection,
+    required this.chatSession,
   }) : super(MessageInitial()) {
     _addAllListener();
 
@@ -71,10 +69,11 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
 
     response.when(
       success: (data) {
-        chatId = data.conversationId;
-        beforeCursor = data.beforeCursor;
-        hasMoreBefore = data.hasMoreBefore;
-        hasMoreAfter = data.hasMoreAfter;
+        chatSession.updateChatSession(
+          chatId: data.chatId,
+          hasMoreBefore: data.hasMoreBefore,
+          beforeCursor: data.beforeCursor,
+        );
         emit(
           MessageLoaded(
             type: LoadedMessagesType.initial,
@@ -92,16 +91,20 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     LoadOlderMessages event,
     Emitter<MessageState> emit,
   ) async {
-    if (!hasMoreBefore) return;
+    if (!chatSession.state.hasMoreBefore) return;
     var response = await olderMessagesUseCase.call(
-      GetOlderMessagesParams(chatId: chatId, cursor: beforeCursor!),
+      GetOlderMessagesParams(
+        chatId: chatSession.state.chatId!,
+        cursor: chatSession.state.beforeCursor!,
+      ),
     );
 
     response.when(
       success: (data) {
-        beforeCursor = data.beforeCursor;
-        hasMoreBefore = data.hasMoreBefore;
-        hasMoreAfter = data.hasMoreAfter;
+        chatSession.updateChatSession(
+          beforeCursor: data.beforeCursor,
+          hasMoreBefore: data.hasMoreBefore,
+        );
         emit(
           MessageLoaded(
             type: LoadedMessagesType.old,
@@ -121,7 +124,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   ) async {
     final response = await messagesAroundMessageUseCase.call(
       GetMessagesAroundMessageParams(
-        chatId: chatId,
+        chatId: chatSession.state.chatId!,
         messageId: event.messageId,
         sentAt: event.sentAt,
       ),
@@ -129,11 +132,12 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
 
     response.when(
       success: (data) {
-        hasMoreAfter = data.hasMoreAfter;
-        hasMoreBefore = data.hasMoreBefore;
-        afterCursor = data.afterCursor;
-        beforeCursor = data.beforeCursor;
-
+        chatSession.updateChatSession(
+          beforeCursor: data.beforeCursor,
+          hasMoreBefore: data.hasMoreBefore,
+          afterCursor: data.afterCursor,
+          hasMoreAfter: data.hasMoreAfter,
+        );
         emit(
           MessageLoaded(
             type: LoadedMessagesType.around,
@@ -151,15 +155,20 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     LoadNewerMessages event,
     Emitter<MessageState> emit,
   ) async {
-    if (afterCursor == null) return;
+    if (chatSession.state.afterCursor == null) return;
     final response = await newerMessagesUseCase.call(
-      GetNewerMessagesParams(chatId: chatId, cursor: afterCursor!),
+      GetNewerMessagesParams(
+        chatId: chatSession.state.chatId!,
+        cursor: chatSession.state.afterCursor!,
+      ),
     );
 
     response.when(
       success: (data) {
-        hasMoreAfter = data.hasMoreAfter;
-        afterCursor = data.afterCursor;
+        chatSession.updateChatSession(
+          hasMoreAfter: data.hasMoreAfter,
+          afterCursor: data.afterCursor,
+        );
         emit(
           MessageLoaded(
             type: LoadedMessagesType.newer,

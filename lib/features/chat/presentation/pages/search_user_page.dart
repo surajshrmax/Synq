@@ -8,6 +8,7 @@ import 'package:synq/features/chat/presentation/bloc/search/search_user_bloc.dar
 import 'package:synq/features/chat/presentation/bloc/search/search_user_event.dart';
 import 'package:synq/features/chat/presentation/bloc/search/search_user_state.dart';
 import 'package:synq/features/chat/presentation/widgets/chat_list_item.dart';
+import 'package:synq/features/user/presentation/widgets/user_list_item.dart';
 import 'package:synq/system_bars_wrapper.dart';
 
 class SearchUserPage extends StatelessWidget {
@@ -103,13 +104,12 @@ class SearchUserPage extends StatelessWidget {
                       itemCount: state.users.length,
                       itemBuilder: (context, index) {
                         var user = state.users.elementAt(index);
-                        // return ChatListItem(
-                        //   onPressed: () =>
-                        //       context.push("/message/null/${user.id}"),
-                        //   title: user.name,
-                        //   subtitle: user.userName,
-                        //   isVerified: user.isVerified,
-                        // );
+                        return UserListItem(
+                          user: user,
+                          onPressed: () {
+                            context.push("/message/null/${user.id}");
+                          },
+                        );
                       },
                     );
                   }
