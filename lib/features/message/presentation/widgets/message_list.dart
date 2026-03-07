@@ -57,7 +57,6 @@ class _MessageListState extends State<MessageList> {
     if (isScrollingForward && currentPixel < minScrollIntent + 200) {
       _loadNewMessages();
     }
-    
   }
 
   void _loadOldMessages() {

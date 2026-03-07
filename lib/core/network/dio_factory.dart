@@ -12,6 +12,7 @@ class DioFactory {
         sendTimeout: Duration(seconds: 10),
         receiveTimeout: Duration(seconds: 10),
         contentType: "application/json",
+        validateStatus: (status) => status! < 500,
       ),
     );
 

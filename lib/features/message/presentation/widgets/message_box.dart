@@ -37,7 +37,7 @@ class _MessageBoxState extends State<MessageBox> {
   Timer? timer;
   @override
   Widget build(BuildContext context) {
-    final chatId = context.read<ChatSessionCubit>().state.chatId!;
+    final chatId = context.read<ChatSessionCubit>().state.chatId;
     final theme = Theme.of(context);
     final textTheme = theme.extension<AppTextColors>();
     final MediaQueryData mediaQuery = MediaQuery.of(context);
@@ -51,6 +51,7 @@ class _MessageBoxState extends State<MessageBox> {
     }
 
     void updateTypingStatus() {
+      if (chatId == null) return;
       if (!isTyping) {
         isTyping = true;
         context.read<TypingCubit>().setTypingStatus(chatId, true);

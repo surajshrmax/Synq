@@ -18,19 +18,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onLoginEvent(LoginEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoginLoading());
-    var response = await loginUseCase.call(
+    final response = await loginUseCase.call(
       LoginParams(email: event.email, password: event.password),
     );
-    switch (response) {
-      case ApiSuccess():
-        emit(AuthSuccess());
-        break;
-      case ApiFailure():
-        emit(
-          AuthError(errorMessage: response.error.message, source: Source.login),
-        );
-        break;
-    }
+
+    response.when(
+      success: (data) => emit(AuthSuccess()),
+      failure: (error) =>
+          emit(AuthError(errorMessage: error.message, source: Source.login)),
+    );
   }
 
   Future<void> _onRegisterEvent(

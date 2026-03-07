@@ -1,5 +1,6 @@
 import 'package:synq/core/network/api_error.dart';
 import 'package:synq/core/network/api_result.dart';
+import 'package:synq/features/auth/data/models/login_response.dart';
 import 'package:synq/features/auth/domain/repository/auth_repository.dart';
 import 'package:synq/features/auth/domain/usecase/login_params.dart';
 
@@ -8,7 +9,7 @@ class LoginUseCase {
 
   LoginUseCase({required this.authRepository});
 
-  Future<ApiResult> call(LoginParams params) async {
+  Future<ApiResult<LoginResponse>> call(LoginParams params) async {
     if (params.email.trim().isEmpty) {
       return ApiFailure(
         error: ApiError(

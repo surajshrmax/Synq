@@ -1,7 +1,12 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:logging/logging.dart';
 import 'package:synq/core/network/api_client.dart';
 import 'package:synq/core/network/api_error.dart';
 import 'package:synq/core/network/api_result.dart';
+import 'package:synq/features/auth/data/models/login_response.dart';
 
 class DioApiClient implements ApiClient {
   final Dio dio;
@@ -14,8 +19,8 @@ class DioApiClient implements ApiClient {
     data,
     Map<String, dynamic>? queryParameters,
     Map<String, String>? headers,
-  }) {
-    return _request(
+  }) async {
+    return await _request(
       () => dio.delete(
         path,
         data: data,
@@ -31,8 +36,8 @@ class DioApiClient implements ApiClient {
     Map<String, dynamic>? queryParameters,
     Map<String, String>? headers,
     T Function(dynamic json)? mapper,
-  }) {
-    return _request(
+  }) async {
+    return await _request(
       () => dio.request(
         path,
         queryParameters: queryParameters,
@@ -49,8 +54,8 @@ class DioApiClient implements ApiClient {
     Map<String, dynamic>? queryParameters,
     Map<String, String>? headers,
     T Function(dynamic json)? mapper,
-  }) {
-    return _request(
+  }) async {
+    return await _request(
       () => dio.post(
         path,
         data: data,
@@ -62,8 +67,8 @@ class DioApiClient implements ApiClient {
   }
 
   @override
-  Future<ApiResult<T>> patch<T>(String path, data) {
-    return _request(() => dio.patch(path, data: data));
+  Future<ApiResult<T>> patch<T>(String path, data) async {
+    return await _request(() => dio.patch(path, data: data));
   }
 
   @override
@@ -73,8 +78,8 @@ class DioApiClient implements ApiClient {
     Map<String, dynamic>? queryParameters,
     Map<String, String>? headers,
     T Function(dynamic json)? mapper,
-  }) {
-    return _request(
+  }) async {
+    return await _request(
       () => dio.request(
         path,
         data: data,
@@ -91,28 +96,27 @@ class DioApiClient implements ApiClient {
   }) async {
     try {
       final response = await request();
-      if (response.statusCode == 200) {
+      final statusCode = response.statusCode!;
+      if (statusCode == 200) {
         return ApiSuccess<T>(
           data: fromJson != null ? fromJson(response.data) : response.data,
         );
       } else {
-        return ApiFailure(
-          error: ApiError(
-            message: response.data['message'],
-            errorType: ApiErrorType.unknown,
-          ),
-        );
+        return ApiFailure<T>(error: _onError(statusCode, response));
       }
     } on DioException catch (e) {
-      return ApiFailure(error: _mapDioError(e));
+      return ApiFailure<T>(error: _onDioException(e));
     } catch (e) {
-      return ApiFailure(
-        error: ApiError(message: e.toString(), errorType: ApiErrorType.unknown),
+      return ApiFailure<T>(
+        error: ApiError(
+          message: "Something went wrong!",
+          errorType: ApiErrorType.unknown,
+        ),
       );
     }
   }
 
-  ApiError _mapDioError(DioException e) {
+  ApiError _onDioException(DioException e) {
     if (e.type == DioExceptionType.sendTimeout ||
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.connectionTimeout) {
@@ -129,8 +133,13 @@ class DioApiClient implements ApiClient {
       );
     }
 
-    final statusCode = e.response?.statusCode;
+    return ApiError(
+      message: 'Something went wrong!',
+      errorType: ApiErrorType.unknown,
+    );
+  }
 
+  ApiError _onError(int statusCode, Response response) {
     if (statusCode == 401) {
       return ApiError(
         message: "Unauthorized",
@@ -141,7 +150,7 @@ class DioApiClient implements ApiClient {
 
     if (statusCode == 400) {
       return ApiError(
-        message: e.response?.data["message"],
+        message: response.data['message'],
         errorType: ApiErrorType.user,
       );
     }
@@ -155,9 +164,8 @@ class DioApiClient implements ApiClient {
     }
 
     return ApiError(
-      message: 'Something went wrong',
+      message: 'Something went wrong!',
       errorType: ApiErrorType.unknown,
-      statusCode: statusCode,
     );
   }
 }

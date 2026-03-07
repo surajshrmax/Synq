@@ -239,17 +239,20 @@ Widget _buildHeader(BuildContext context) {
             color: primaryColor,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Row(
-            children: [
-              Icon(Icons.chevron_left, size: 16, color: Colors.white),
-              Text(
-                "Back",
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
+          child: GestureDetector(
+            onTap: () => context.pop(),
+            child: Row(
+              children: [
+                Icon(Icons.chevron_left, size: 16, color: Colors.white),
+                Text(
+                  "Back",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
 

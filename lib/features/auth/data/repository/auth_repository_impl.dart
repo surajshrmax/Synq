@@ -13,7 +13,7 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({required this.client, required this.secureStorage});
 
   @override
-  Future<ApiResult> loginUser(LoginParams params) async {
+  Future<ApiResult<LoginResponse>> loginUser(LoginParams params) async {
     var response = await client.post<LoginResponse>(
       "/auth/login",
       data: {"email": params.email, "password": params.password},
@@ -30,7 +30,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<ApiResult> registerUser(RegisterParams params) async {
+  Future<ApiResult<LoginResponse>> registerUser(RegisterParams params) async {
     var response = await client.post<LoginResponse>(
       "/auth/register",
       data: {
