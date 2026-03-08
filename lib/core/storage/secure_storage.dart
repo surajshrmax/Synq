@@ -12,7 +12,7 @@ class SecureStorage {
 
   Future<void> saveToken(AuthToken token) async {
     await _storage.write(key: _accessTokenKey, value: token.accessToken);
-    await _storage.write(key: _refreshTokenkey, value: token.refreshTokne);
+    await _storage.write(key: _refreshTokenkey, value: token.refreshToken);
   }
 
   Future<String?> getId() async {

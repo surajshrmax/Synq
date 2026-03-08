@@ -22,6 +22,8 @@ class LoadNewerMessages extends MessageEvent {}
 
 class StartConnection extends MessageEvent {}
 
+class CloseConnection extends MessageEvent {}
+
 class SendMessage extends MessageEvent {
   final String id;
   final bool isChat;

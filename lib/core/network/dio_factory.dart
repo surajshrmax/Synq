@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:synq/config/constants.dart';
 import 'package:synq/core/di/service_locator.dart';
 import 'package:synq/core/network/interceptors/auth_interceptors.dart';
 import 'package:synq/core/storage/secure_storage.dart';
@@ -12,7 +13,7 @@ class DioFactory {
         sendTimeout: Duration(seconds: 10),
         receiveTimeout: Duration(seconds: 10),
         contentType: "application/json",
-        validateStatus: (status) => status! < 500,
+        validateStatus: (status) => status! == 400 || status == 200,
       ),
     );
 

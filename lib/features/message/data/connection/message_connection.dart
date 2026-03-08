@@ -113,6 +113,14 @@ class MessageConnection {
     }
   }
 
+  Future<void> closeConnection() async {
+    if (hubConnection.state == HubConnectionState.Connected ||
+        hubConnection.state == HubConnectionState.Connecting ||
+        hubConnection.state == HubConnectionState.Reconnecting) {
+      await hubConnection.stop();
+    }
+  }
+
   Future<void> sendMessage(
     String id,
     IdType type,

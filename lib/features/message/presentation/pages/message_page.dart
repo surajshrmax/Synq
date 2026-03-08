@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/config/theme/app_theme.dart';
@@ -32,6 +33,8 @@ class MessagePage extends StatefulWidget {
 }
 
 class _MessagePageState extends State<MessagePage> {
+  late MessageBloc messageBloc;
+
   final TextEditingController messageBoxController = TextEditingController();
   final AutoScrollController messageScrollController = AutoScrollController();
   final FocusNode messageBoxFocusNode = FocusNode();
@@ -45,6 +48,7 @@ class _MessagePageState extends State<MessagePage> {
 
   @override
   void initState() {
+    messageBloc = context.read<MessageBloc>();
     if (!widget.chatId.contains("null")) {
       context.read<ChatSessionCubit>().updateChatSession(chatId: widget.chatId);
     }
@@ -60,6 +64,12 @@ class _MessagePageState extends State<MessagePage> {
     messageScrollController.addListener(_onScroll);
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    messageBloc.add(CloseConnection());
+    super.dispose();
   }
 
   void _onScroll() {
@@ -243,7 +253,8 @@ Widget _buildHeader(BuildContext context) {
             onTap: () => context.pop(),
             child: Row(
               children: [
-                Icon(Icons.chevron_left, size: 16, color: Colors.white),
+                // Icon(Icons.chevron_left, size: 16, color: Colors.white),
+                HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, size: 16),
                 Text(
                   "Back",
                   style: TextStyle(
@@ -276,8 +287,8 @@ Widget _buildHeader(BuildContext context) {
             Row(
               spacing: 5,
               children: [
-                Icon(
-                  Icons.access_time,
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedTime02,
                   color: textTheme?.secondaryTextColor,
                   size: 14,
                 ),
@@ -292,7 +303,7 @@ Widget _buildHeader(BuildContext context) {
             ),
           ],
         ),
-        Icon(Icons.more_vert),
+        HugeIcon(icon: HugeIcons.strokeRoundedMoreVerticalCircle02),
       ],
     ),
   );

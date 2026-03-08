@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:synq/core/storage/secure_storage.dart';
 import 'package:synq/features/auth/data/models/login_response.dart';
 
@@ -9,7 +11,7 @@ class AuthInterceptor extends Interceptor {
   final Dio dio;
 
   bool _isRefreshing = false;
-  final List<Function()> requestQueues = [];
+  final List<Completer<void>> _refreshCompleters = [];
 
   AuthInterceptor({required this.storage, required this.dio});
 
@@ -27,66 +29,69 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401 &&
-        !_isRefreshRequest(err.requestOptions)) {
-      return _refreshToken(err, handler);
+    if (err.response?.statusCode != 401) {
+      return handler.next(err);
+    }
+
+    final requestOptions = err.requestOptions;
+
+    if (requestOptions.extra['retry'] == true) {
+      return handler.next(err);
+    }
+
+    try {
+      await _refreshToken();
+
+      final newAccessToken = storage.getAccessToken();
+      requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+      requestOptions.extra['retry'] = true;
+
+      final response = await dio.fetch(requestOptions);
+
+      return handler.resolve(response);
+    } catch (e) {
+      await storage.deleteAllTokens();
+      return handler.next(err);
     }
   }
 
-  bool _isRefreshRequest(RequestOptions options) {
-    return options.path.contains("/auth/refresh");
-  }
-
-  Future<void> _refreshToken(
-    DioException err,
-    ErrorInterceptorHandler handler,
-  ) async {
-    final requestOptions = err.requestOptions;
-
+  Future<void> _refreshToken() async {
     if (_isRefreshing) {
-      requestQueues.add(() async {
-        final response = await dio.fetch(requestOptions);
-        handler.resolve(response);
-      });
-      return;
+      final completer = Completer<void>();
+      _refreshCompleters.add(completer);
+      return completer.future;
     }
 
     _isRefreshing = true;
 
     try {
       final refreshToken = await storage.getRefreshToken();
-      if (refreshToken == null) throw Exception("Token not found");
-
       final response = await dio.post(
         "/auth/refresh-token",
-        data: {'refreshToken': refreshToken},
+        data: {"refreshToken": refreshToken},
       );
 
-      Map<String, dynamic> json = response.data;
+      final newAccessToken = response.data['accessToken'];
+      final newRefreshToken = response.data['refreshToken'];
 
-      var tokens = AuthToken(
-        accessToken: json['accessToken'],
-        refreshTokne: json['refreshToken'],
+      await storage.saveToken(
+        AuthToken(accessToken: newAccessToken, refreshToken: newRefreshToken),
       );
-      await storage.saveToken(tokens);
-    } catch (e) {}
-  }
 
-  Future<Response> _retryRequest(RequestOptions requestOptions) async {
-    var options = Options(
-      method: requestOptions.method,
-      headers: {
-        ...requestOptions.headers,
-        "Authrorization": "Bearer ${await storage.getAccessToken()}",
-      },
-    );
+      for (final completer in _refreshCompleters) {
+        completer.complete();
+      }
 
-    return dio.request(
-      requestOptions.path,
-      data: requestOptions.data,
-      queryParameters: requestOptions.queryParameters,
-      options: options,
-    );
+      _refreshCompleters.clear();
+    } catch (e) {
+      for (final completer in _refreshCompleters) {
+        completer.completeError(e);
+      }
+
+      _refreshCompleters.clear();
+      rethrow;
+    } finally {
+      _isRefreshing = false;
+    }
   }
 }
-

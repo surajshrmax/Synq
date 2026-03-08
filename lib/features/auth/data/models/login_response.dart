@@ -8,14 +8,14 @@ class LoginResponse {
     userId: json['userId'],
     token: AuthToken(
       accessToken: json['accessToken'],
-      refreshTokne: json['refreshToken'],
+      refreshToken: json['refreshToken'],
     ),
   );
 }
 
 class AuthToken {
   final String accessToken;
-  final String refreshTokne;
+  final String refreshToken;
 
-  AuthToken({required this.accessToken, required this.refreshTokne});
+  AuthToken({required this.accessToken, required this.refreshToken});
 }

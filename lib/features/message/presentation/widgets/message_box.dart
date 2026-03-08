@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/config/theme/app_theme.dart';
 import 'package:synq/core/widgets/synq_animated_container.dart';
@@ -196,10 +197,10 @@ class _MessageBoxState extends State<MessageBox> {
                                     MessageBoxCubitState
                                   >(
                                     builder: (context, state) {
-                                      return Icon(
-                                        state.isEditing
-                                            ? Icons.done
-                                            : Icons.keyboard_arrow_up,
+                                      return HugeIcon(
+                                        icon: state.isEditing
+                                            ? HugeIcons.strokeRoundedTick01
+                                            : HugeIcons.strokeRoundedSent,
                                         color: Colors.white,
                                       );
                                     },

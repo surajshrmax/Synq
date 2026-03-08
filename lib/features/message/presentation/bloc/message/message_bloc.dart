@@ -56,6 +56,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     on<MessageEditedEvent>(_onMessageEditedEvent);
     on<MessageDeletedEvent>(_onMessageDeletedEvent);
     on<StartConnection>(_onStartConnection);
+    on<CloseConnection>(_onCloseConnection);
   }
 
   Future<void> _onLoadInitialMessageEvent(
@@ -239,6 +240,14 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     final secureStorage = getIt<SecureStorage>();
     await messageConnection.buildConnection(secureStorage.getAccessToken());
     await messageConnection.startConnection();
+  }
+
+  Future<void> _onCloseConnection(
+    CloseConnection event,
+    Emitter<MessageState> emit,
+  ) async {
+    await messageConnection.closeConnection();
+    chatSession.clear();
   }
 
   void _addAllListener() {
