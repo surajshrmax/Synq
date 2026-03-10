@@ -303,7 +303,11 @@ Widget _buildHeader(BuildContext context) {
             ),
           ],
         ),
-        HugeIcon(icon: HugeIcons.strokeRoundedMoreVerticalCircle02),
+        HugeIcon(
+          icon: HugeIcons.strokeRoundedMoreVertical,
+          size: 28,
+          strokeWidth: 2,
+        ),
       ],
     ),
   );

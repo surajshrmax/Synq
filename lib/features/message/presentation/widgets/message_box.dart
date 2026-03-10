@@ -104,11 +104,19 @@ class _MessageBoxState extends State<MessageBox> {
                           child: Row(
                             spacing: 10,
                             children: [
-                              Icon(
-                                state.isEditing ? Icons.edit : Icons.reply,
+                              HugeIcon(
+                                icon: state.isEditing
+                                    ? HugeIcons.strokeRoundedPencilEdit01
+                                    : HugeIcons.strokeRoundedArrowMoveUpRight,
+
+                                size: 18,
                                 color: textTheme?.secondaryTextColor,
-                                size: 14,
                               ),
+                              // Icon(
+                              //   state.isEditing ? Icons.edit : Icons.reply,
+                              //   color: textTheme?.secondaryTextColor,
+                              //   size: 14,
+                              // ),
                               Expanded(
                                 child: Text(
                                   maxLines: 1,

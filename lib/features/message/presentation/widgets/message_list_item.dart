@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/core/widgets/synq_container.dart';
 import 'package:synq/features/message/data/models/message_model.dart';
+import 'package:synq/features/message/presentation/bloc/message-box/message_box_cubit.dart';
+import 'package:synq/features/message/presentation/widgets/swipe_to_reply.dart';
 import 'package:synq/features/user/presentation/widgets/profile_image.dart';
 
-class MessageListItem extends StatelessWidget {
+class MessageListItem extends StatefulWidget {
   final VoidCallback onPressed;
   final MessageModel message;
   final bool showTime;
@@ -23,18 +29,23 @@ class MessageListItem extends StatelessWidget {
   });
 
   @override
+  State<MessageListItem> createState() => _MessageListItemState();
+}
+
+class _MessageListItemState extends State<MessageListItem> {
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.extension<AppTextColors>();
 
     return SynqContainer(
-      onPressed: () => onPressed(),
+      onPressed: () => widget.onPressed(),
       padding: const EdgeInsets.all(8.0),
       child: Column(
         spacing: 10,
         children: [
           Visibility(
-            visible: showTime,
+            visible: widget.showTime,
             child: Container(
               margin: EdgeInsets.symmetric(vertical: 10),
               child: Row(
@@ -42,32 +53,28 @@ class MessageListItem extends StatelessWidget {
                 children: [
                   Expanded(child: Divider()),
                   Text(
-                    "${message.sendAt!.toLocal().day}/${message.sendAt!.toLocal().month}/${message.sendAt!.toLocal().year}",
+                    "${widget.message.sendAt!.toLocal().day}/${widget.message.sendAt!.toLocal().month}/${widget.message.sendAt!.toLocal().year}",
                   ),
                   Expanded(child: Divider()),
                 ],
               ),
             ),
           ),
-          Dismissible(
-            direction: DismissDirection.endToStart,
-            movementDuration: Duration(milliseconds: 100),
-            resizeDuration: Duration(milliseconds: 100),
-            background: Container(
-              alignment: Alignment.centerRight,
-              padding: EdgeInsets.all(10),
-              child: Icon(Icons.reply, color: textTheme?.secondaryTextColor),
+
+          SwipeToReply(
+            onPressed: () => widget.onPressed(),
+            onReply: () => context.read<MessageBoxCubit>().addReply(
+              widget.message.id,
+              widget.message.content,
             ),
-            confirmDismiss: (direction) => onDrag(direction),
-            key: ValueKey(message.sendAt),
             child: Column(
               spacing: 10,
               children: [
-                message.reply != null
+                widget.message.reply != null
                     ? GestureDetector(
-                        onTap: () => onReplyClicked!(
-                          message.replyMessageId!,
-                          message.reply!.serverTime,
+                        onTap: () => widget.onReplyClicked!(
+                          widget.message.replyMessageId!,
+                          widget.message.reply!.serverTime,
                         ),
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10),
@@ -81,7 +88,7 @@ class MessageListItem extends StatelessWidget {
                               ),
                               Expanded(
                                 child: Text(
-                                  message.reply!.content,
+                                  widget.message.reply!.content,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -103,7 +110,13 @@ class MessageListItem extends StatelessWidget {
                     ProfileImage(
                       height: 40,
                       width: 40,
-                      letter: message.sender!.profile!.name!.characters.first
+                      letter: widget
+                          .message
+                          .sender!
+                          .profile!
+                          .name!
+                          .characters
+                          .first
                           .toUpperCase(),
                     ),
                     Expanded(
@@ -114,25 +127,25 @@ class MessageListItem extends StatelessWidget {
                             spacing: 5,
                             children: [
                               Text(
-                                message.sender!.profile!.name!,
+                                widget.message.sender!.profile!.name!,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
-                                  color: index % 2 == 0
+                                  color: widget.index % 2 == 0
                                       ? Colors.blue
                                       : Colors.orange,
                                 ),
                               ),
                               // Icon(Icons.verified, size: 15, color: Colors.amber),
                               Text(
-                                "at ${message.sendAt!.toLocal().hour}:${message.sendAt!.toLocal().minute} ${message.sendAt!.toLocal().hour < 12 ? 'AM' : 'PM'}",
+                                "at ${widget.message.sendAt!.toLocal().hour}:${widget.message.sendAt!.toLocal().minute} ${widget.message.sendAt!.toLocal().hour < 12 ? 'AM' : 'PM'}",
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: textTheme?.secondaryTextColor,
                                 ),
                               ),
                               Visibility(
-                                visible: message.isEdited!,
+                                visible: widget.message.isEdited!,
                                 child: Icon(
                                   Icons.edit,
                                   size: 10,
@@ -141,7 +154,10 @@ class MessageListItem extends StatelessWidget {
                               ),
                             ],
                           ),
-                          Text(message.content, style: TextStyle(fontSize: 16)),
+                          Text(
+                            widget.message.content,
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ],
                       ),
                     ),
