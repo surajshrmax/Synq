@@ -6,6 +6,8 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/config/theme/app_theme.dart';
+import 'package:synq/core/widgets/synq_alert_dialog.dart';
+import 'package:synq/core/widgets/synq_bottom_sheet_dialog.dart';
 import 'package:synq/core/widgets/synq_container.dart';
 import 'package:synq/features/message/presentation/bloc/chat-session/chat_session_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/fab/fab_cubit.dart';
@@ -186,9 +188,9 @@ class _MessagePageState extends State<MessagePage> {
             Expanded(
               child: MessageList(
                 autoScrollController: messageScrollController,
-                onItemPressed: (messsage) {
+                onItemPressed: (message) {
                   messageBoxFocusNode.unfocus();
-                  showMessageOptions(context, messsage.id, messsage.content);
+                  showMessageOptions(context, message.id, message.content);
                 },
               ),
             ),
@@ -315,51 +317,61 @@ Widget _buildHeader(BuildContext context) {
 
 void showMessageOptions(BuildContext context, String id, String content) {
   final theme = Theme.of(context);
-  showModalBottomSheet(
-    backgroundColor: theme.scaffoldBackgroundColor,
-    isScrollControlled: true,
-    useRootNavigator: true,
+  final textTheme = theme.extension<AppTextColors>();
+  SynqBottomSheetDialog.showDialog(
     context: context,
-    builder: (context) {
-      return SafeArea(
-        child: AnimatedPadding(
-          padding: EdgeInsets.only(
-            left: 10,
-            right: 10,
-            top: 10,
-            // bottom: MediaQuery.of(context).padding.bottom,
-          ),
-          duration: Duration(milliseconds: 150),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("This is message options"),
-              SizedBox(height: 30),
-              SynqContainer(
-                onPressed: () {
-                  context.pop();
-                  context.read<MessageBoxCubit>().startEditing(id, content);
-                },
-                backgroundColor: theme.cardColor,
-                height: 40,
-                child: Center(child: Text("Edit Message")),
-              ),
-              SizedBox(height: 10),
+    title: content,
+    items: [
+      DialogItem(
+        icon: HugeIcons.strokeRoundedPencilEdit01,
+        title: "Edit Message",
+        onPressed: () {
+          print("Edit Message Clicked");
+        },
+      ),
 
-              SynqContainer(
+      DialogItem(
+        icon: HugeIcons.strokeRoundedArrowMoveUpRight,
+        title: "Reply to Message",
+        onPressed: () {},
+      ),
+
+      DialogItem(
+        icon: HugeIcons.strokeRoundedCopy01,
+        title: "Copy Message",
+        onPressed: () {},
+      ),
+
+      DialogItem(
+        icon: HugeIcons.strokeRoundedDelete01,
+        iconColor: Colors.red,
+        title: "Delete Message",
+        textColor: Colors.red,
+        onPressed: () {
+          context.pop();
+          SynqAlertDialog.show(
+            context: context,
+            title: "Delete Message",
+            message: "Are you sure you want to delete this message?",
+            items: [
+              TextButton(
+                onPressed: () => context.pop(),
+                child: Text(
+                  "Cancle",
+                  style: TextStyle(color: textTheme?.secondaryTextColor),
+                ),
+              ),
+              TextButton(
                 onPressed: () {
                   context.pop();
                   context.read<MessageBloc>().add(DeleteMessage(id: id));
                 },
-                backgroundColor: Colors.redAccent,
-                height: 40,
-                child: Center(child: Text("Delete")),
+                child: Text("Delete", style: TextStyle(color: Colors.red)),
               ),
-              SizedBox(height: 20),
             ],
-          ),
-        ),
-      );
-    },
+          );
+        },
+      ),
+    ],
   );
 }

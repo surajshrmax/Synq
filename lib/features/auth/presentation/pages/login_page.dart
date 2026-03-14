@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
-import 'package:synq/core/widgets/bottom_sheet_dialog.dart';
+import 'package:synq/core/widgets/synq_bottom_sheet_dialog.dart';
 import 'package:synq/core/widgets/synq_button.dart';
 import 'package:synq/core/widgets/synq_text_field.dart';
 import 'package:synq/features/auth/presentation/bloc/auth_bloc.dart';
@@ -30,7 +30,7 @@ class LoginPage extends StatelessWidget {
           current is AuthError && current.source == Source.login,
       listener: (context, state) {
         if (state is AuthError) {
-          showErrorDialog(context, state.errorMessage);
+          SynqBottomSheetDialog.showErrorDialog(context, state.errorMessage);
         } else if (state is AuthSuccess) {
           context.go("/home");
         }
