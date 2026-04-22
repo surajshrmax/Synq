@@ -3,7 +3,9 @@ import 'package:synq/features/auth/presentation/pages/login_page.dart';
 import 'package:synq/features/auth/presentation/pages/register_page.dart';
 import 'package:synq/features/auth/presentation/pages/welcome_page.dart';
 import 'package:synq/features/chat/presentation/pages/chat_page.dart';
+import 'package:synq/features/chat/presentation/pages/create_new_group_page.dart';
 import 'package:synq/features/chat/presentation/pages/search_user_page.dart';
+import 'package:synq/features/chat/presentation/pages/select_group_members_page.dart';
 import 'package:synq/features/message/presentation/pages/message_page.dart';
 import 'package:synq/splash_screen.dart';
 
@@ -24,6 +26,21 @@ final routes = GoRouter(
         final conversationId = state.pathParameters['conversationId'];
         final userID = state.pathParameters['userId'];
         return MessagePage(chatId: conversationId!, userId: userID!);
+      },
+    ),
+    GoRoute(
+      path: "/create_group",
+      builder: (context, state) {
+        return CreateNewGroupPage();
+      },
+    ),
+
+    GoRoute(
+      path: "/select_members/:groupName",
+      builder: (context, state) {
+        return SelectGroupMembersPage(
+          groupName: state.pathParameters['groupName'].toString(),
+        );
       },
     ),
   ],

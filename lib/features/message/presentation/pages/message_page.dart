@@ -8,7 +8,6 @@ import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/config/theme/app_theme.dart';
 import 'package:synq/core/widgets/synq_alert_dialog.dart';
 import 'package:synq/core/widgets/synq_bottom_sheet_dialog.dart';
-import 'package:synq/core/widgets/synq_container.dart';
 import 'package:synq/features/message/presentation/bloc/chat-session/chat_session_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/fab/fab_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_bloc.dart';
@@ -17,11 +16,11 @@ import 'package:synq/features/message/presentation/bloc/message-box/message_box_
 import 'package:synq/features/message/presentation/bloc/message-box/message_box_cubit_state.dart';
 import 'package:synq/features/message/presentation/bloc/typing/typing_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/typing/typing_cubit_state.dart';
-import 'package:synq/features/chat/presentation/bloc/user/user_bloc.dart';
-import 'package:synq/features/chat/presentation/bloc/user/user_event.dart';
-import 'package:synq/features/chat/presentation/bloc/user/user_state.dart';
 import 'package:synq/features/message/presentation/widgets/message_box.dart';
 import 'package:synq/features/message/presentation/widgets/message_list.dart';
+import 'package:synq/features/user/presentation/bloc/user/user_bloc.dart';
+import 'package:synq/features/user/presentation/bloc/user/user_event.dart';
+import 'package:synq/features/user/presentation/bloc/user/user_state.dart';
 import 'package:synq/system_bars_wrapper.dart';
 
 class MessagePage extends StatefulWidget {

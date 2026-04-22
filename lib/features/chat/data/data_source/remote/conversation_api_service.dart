@@ -19,4 +19,14 @@ class ConversationApiService {
       failure: (error) => ApiFailure(error: error),
     );
   }
+
+  Future<ApiResult> createGroup(String name, List<String> members) async {
+    var response = await apiClient.post("/chats", data: {
+      "name": name,
+      "imageUrl": "",
+      "members": members
+    });
+
+    return response.when(success: (data) => ApiSuccess(data: data), failure: (error) => ApiFailure(error: error),);
+  }
 }

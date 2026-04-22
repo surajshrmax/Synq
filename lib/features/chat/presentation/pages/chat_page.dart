@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/core/di/service_locator.dart';
 import 'package:synq/core/storage/secure_storage.dart';
@@ -30,8 +31,19 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
     return SystemBarsWrapper(
       child: Scaffold(
+        floatingActionButton: Padding(
+          padding: EdgeInsets.only(bottom: mediaQuery.padding.bottom + 30),
+          child: FloatingActionButton(
+            onPressed: () {
+              context.push("/create_group");
+            },
+            shape: CircleBorder(),
+            child: HugeIcon(icon: HugeIcons.strokeRoundedBubbleChatAdd),
+          ),
+        ),
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(child: _buildHeader(context)),

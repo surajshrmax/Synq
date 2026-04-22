@@ -10,33 +10,36 @@ import 'package:synq/features/auth/domain/repository/auth_repository.dart';
 import 'package:synq/features/auth/domain/usecase/login_use_case.dart';
 import 'package:synq/features/auth/domain/usecase/register_use_case.dart';
 import 'package:synq/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:synq/features/message/data/connection/message_connection.dart';
 import 'package:synq/features/chat/data/data_source/remote/conversation_api_service.dart';
-import 'package:synq/features/message/data/data_source/remote/message_api_service.dart';
-import 'package:synq/features/chat/data/data_source/remote/user_api_service.dart';
 import 'package:synq/features/chat/data/repository/conversation_repository_impl.dart';
-import 'package:synq/features/message/data/repository/message_repository_impl.dart';
-import 'package:synq/features/chat/data/repository/user_repository_impl.dart';
 import 'package:synq/features/chat/domain/repository/conversation_repository.dart';
-import 'package:synq/features/message/domain/repository/message_repository.dart';
-import 'package:synq/features/chat/domain/repository/user_repository.dart';
-import 'package:synq/features/message/domain/usecases/delete_message_use_case.dart';
+import 'package:synq/features/chat/domain/usecases/create_group_use_case.dart';
 import 'package:synq/features/chat/domain/usecases/get_all_conversation_use_case.dart';
+import 'package:synq/features/chat/presentation/bloc/chat/chat_bloc.dart';
+import 'package:synq/features/chat/presentation/bloc/group/group_bloc.dart';
+import 'package:synq/features/message/data/connection/message_connection.dart';
+import 'package:synq/features/message/data/data_source/remote/message_api_service.dart';
+import 'package:synq/features/message/data/repository/message_repository_impl.dart';
+import 'package:synq/features/message/domain/repository/message_repository.dart';
+import 'package:synq/features/message/domain/usecases/delete_message_use_case.dart';
 import 'package:synq/features/message/domain/usecases/get_initial_messages_use_case.dart';
 import 'package:synq/features/message/domain/usecases/get_messages_around_message_use_case.dart';
 import 'package:synq/features/message/domain/usecases/get_newer_messages_use_case.dart';
 import 'package:synq/features/message/domain/usecases/get_older_messages_use_case.dart';
-import 'package:synq/features/chat/domain/usecases/get_user_info_use_case.dart';
-import 'package:synq/features/chat/domain/usecases/search_user_use_case.dart';
 import 'package:synq/features/message/domain/usecases/send_message_use_case.dart';
 import 'package:synq/features/message/domain/usecases/update_message_use_case.dart';
 import 'package:synq/features/message/domain/usecases/update_typing_status_use_case.dart';
-import 'package:synq/features/chat/presentation/bloc/chat/chat_bloc.dart';
 import 'package:synq/features/message/presentation/bloc/chat-session/chat_session_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_bloc.dart';
-import 'package:synq/features/chat/presentation/bloc/search/search_user_bloc.dart';
 import 'package:synq/features/message/presentation/bloc/typing/typing_cubit.dart';
-import 'package:synq/features/chat/presentation/bloc/user/user_bloc.dart';
+import 'package:synq/features/user/data/data_source/remote/user_api_service.dart';
+import 'package:synq/features/user/data/repository/user_repository_impl.dart';
+import 'package:synq/features/user/domain/repository/user_repository.dart';
+import 'package:synq/features/user/domain/usecases/get_friends_use_case.dart';
+import 'package:synq/features/user/domain/usecases/get_user_info_use_case.dart';
+import 'package:synq/features/user/domain/usecases/search_user_use_case.dart';
+import 'package:synq/features/user/presentation/bloc/search/search_user_bloc.dart';
+import 'package:synq/features/user/presentation/bloc/user/user_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -88,8 +91,15 @@ void setUpDI() {
     () => GetUserInfoUseCase(userRepository: getIt<UserRepository>()),
   );
 
+  getIt.registerLazySingleton<GetFriendsUseCase>(
+    () => GetFriendsUseCase(userRepository: getIt<UserRepository>()),
+  );
+
   getIt.registerFactory<UserBloc>(
-    () => UserBloc(useCase: getIt<GetUserInfoUseCase>()),
+    () => UserBloc(
+      userInfoUseCase: getIt<GetUserInfoUseCase>(),
+      friendsUseCase: getIt<GetFriendsUseCase>(),
+    ),
   );
 
   //dependencies for conversation
@@ -107,6 +117,10 @@ void setUpDI() {
       conversationRepository: getIt<ConversationRepository>(),
     ),
   );
+
+  getIt.registerLazySingleton<CreateGroupUseCase>(() => CreateGroupUseCase(repository: getIt<ConversationRepository>()),);
+
+  getIt.registerFactory<GroupBloc>(() => GroupBloc(createGroupUseCase: getIt<CreateGroupUseCase>()),);
 
   getIt.registerFactory<ChatBloc>(
     () => ChatBloc(useCase: getIt<GetAllConversationUseCase>()),

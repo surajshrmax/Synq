@@ -20,7 +20,7 @@ class ChatModel {
     id: json['id'],
     title: json['title'],
     isGroup: json['isGroup'],
-    user: UserModel.fromJson(json['user']),
+    user: (json['isGroup'] as bool) ? null : UserModel.fromJson(json['user']),
     lastMessage: json['lastMessage'] == null
         ? null
         : MessageModel.fromJson(json["lastMessage"]),

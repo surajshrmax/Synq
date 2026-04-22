@@ -12,4 +12,9 @@ class ConversationRepositoryImpl implements ConversationRepository {
   Future<ApiResult<List<ChatModel>>> getAllConversation() async {
     return await apiService.getAllConversation();
   }
+
+  @override
+  Future<ApiResult> createGroupConversation(String name, List<String> members) async {
+    return await apiService.createGroup(name, members);
+  }
 }

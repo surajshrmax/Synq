@@ -1,7 +1,8 @@
 import 'package:synq/core/network/api_result.dart';
 import 'package:synq/features/auth/data/models/user_model.dart';
-import 'package:synq/features/chat/data/data_source/remote/user_api_service.dart';
-import 'package:synq/features/chat/domain/repository/user_repository.dart';
+import 'package:synq/features/user/data/data_source/remote/user_api_service.dart';
+import 'package:synq/features/user/data/models/friends_response.dart';
+import 'package:synq/features/user/domain/repository/user_repository.dart';
 
 class UserRepositoryImpl implements UserRepository {
   final UserApiService apiService;
@@ -16,5 +17,10 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<ApiResult<Iterable<UserModel>>> searchUser(String name) async {
     return await apiService.searchUser(name);
+  }
+
+  @override
+  Future<ApiResult<FriendsResponse>> getFriends() async {
+    return await apiService.getFriends();
   }
 }

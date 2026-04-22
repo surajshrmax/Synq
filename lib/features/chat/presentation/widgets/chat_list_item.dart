@@ -23,7 +23,11 @@ class ChatListItem extends StatelessWidget {
       child: Row(
         spacing: 10.r,
         children: [
-          ProfileImage(letter: chat.user!.profile!.name!.characters.first),
+          ProfileImage(
+            letter: chat.isGroup
+                ? chat.title!.characters.first
+                : chat.user!.profile!.name!.characters.first,
+          ),
 
           Expanded(
             child: Column(
@@ -36,7 +40,9 @@ class ChatListItem extends StatelessWidget {
                       spacing: 5,
                       children: [
                         Text(
-                          chat.user!.profile!.name!,
+                          chat.isGroup
+                              ? chat.title!
+                              : chat.user!.profile!.name!,
                           style: TextStyle(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w600,

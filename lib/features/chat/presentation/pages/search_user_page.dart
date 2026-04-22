@@ -4,10 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:synq/core/widgets/synq_container.dart';
 import 'package:synq/core/widgets/synq_icon_button.dart';
-import 'package:synq/features/chat/presentation/bloc/search/search_user_bloc.dart';
-import 'package:synq/features/chat/presentation/bloc/search/search_user_event.dart';
-import 'package:synq/features/chat/presentation/bloc/search/search_user_state.dart';
-import 'package:synq/features/chat/presentation/widgets/chat_list_item.dart';
+import 'package:synq/features/user/presentation/bloc/search/search_user_bloc.dart';
+import 'package:synq/features/user/presentation/bloc/search/search_user_event.dart';
+import 'package:synq/features/user/presentation/bloc/search/search_user_state.dart';
 import 'package:synq/features/user/presentation/widgets/user_list_item.dart';
 import 'package:synq/system_bars_wrapper.dart';
 

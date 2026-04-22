@@ -5,3 +5,5 @@ class GetUserInfoEvent extends UserEvent {
 
   GetUserInfoEvent({required this.userId});
 }
+
+class GetFriends extends UserEvent {}

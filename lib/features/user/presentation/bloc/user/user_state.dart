@@ -13,3 +13,9 @@ class UserStateInfoLoaded extends UserState {
 
   UserStateInfoLoaded({required this.user});
 }
+
+class UserStateFriendsLoaded extends UserState {
+  final List<UserModel> friends;
+
+  UserStateFriendsLoaded({required this.friends});
+}

@@ -1,6 +1,7 @@
 import 'package:synq/core/network/api_client.dart';
 import 'package:synq/core/network/api_result.dart';
 import 'package:synq/features/auth/data/models/user_model.dart';
+import 'package:synq/features/user/data/models/friends_response.dart';
 
 class UserApiService {
   final ApiClient client;
@@ -27,6 +28,18 @@ class UserApiService {
         Iterable<UserModel> users = data.map((e) => UserModel.fromJson(e));
         return ApiSuccess<Iterable<UserModel>>(data: users);
       },
+      failure: (error) => ApiFailure(error: error),
+    );
+  }
+
+  Future<ApiResult<FriendsResponse>> getFriends() async {
+    var response = await client.get<FriendsResponse>(
+      "/users/friends",
+      mapper: (json) => FriendsResponse.fromJson(json),
+    );
+
+    return response.when(
+      success: (data) => ApiSuccess(data: data),
       failure: (error) => ApiFailure(error: error),
     );
   }

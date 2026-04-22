@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synq/features/auth/domain/entities/user.dart';
-import 'package:synq/features/chat/domain/usecases/search_user_use_case.dart';
-import 'package:synq/features/chat/presentation/bloc/search/search_user_event.dart';
-import 'package:synq/features/chat/presentation/bloc/search/search_user_state.dart';
+import 'package:synq/features/user/domain/usecases/search_user_use_case.dart';
+import 'package:synq/features/user/presentation/bloc/search/search_user_event.dart';
+import 'package:synq/features/user/presentation/bloc/search/search_user_state.dart';
 
 class SearchUserBloc extends Bloc<SearchUserEvent, SearchUserState> {
   final SearchUserUseCase useCase;
