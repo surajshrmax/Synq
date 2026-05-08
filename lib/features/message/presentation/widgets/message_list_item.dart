@@ -5,6 +5,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
+import 'package:synq/config/theme/app_theme.dart';
 import 'package:synq/core/widgets/synq_container.dart';
 import 'package:synq/features/message/data/models/message_model.dart';
 import 'package:synq/features/message/presentation/bloc/message-box/message_box_cubit.dart';
@@ -64,7 +65,7 @@ class _MessageListItemState extends State<MessageListItem> {
           SwipeToReply(
             onPressed: () => widget.onPressed(),
             onReply: () => context.read<MessageBoxCubit>().addReply(
-              widget.message.id,
+              widget.message.serverId,
               widget.message.content,
             ),
             child: Column(
@@ -152,6 +153,29 @@ class _MessageListItemState extends State<MessageListItem> {
                                   color: textTheme?.secondaryTextColor,
                                 ),
                               ),
+                              switch (widget.message.status) {
+                                "sent" => HugeIcon(
+                                  icon: HugeIcons.strokeRoundedTick02,
+                                  size: 15,
+                                ),
+                                "delivered" => HugeIcon(
+                                  icon: HugeIcons.strokeRoundedTickDouble02,
+                                  size: 15,
+                                ),
+                                "seen" => HugeIcon(
+                                  icon: HugeIcons.strokeRoundedTickDouble02,
+                                  size: 15,
+                                  color: Colors.blue,
+                                ),
+                                (_) => SizedBox(
+                                  height: 10,
+                                  width: 10,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 1.5,
+                                    color: textTheme?.secondaryTextColor,
+                                  ),
+                                ),
+                              },
                             ],
                           ),
                           Text(

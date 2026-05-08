@@ -7,6 +7,7 @@ import 'package:synq/features/message/domain/usecases/get_messages_around_messag
 import 'package:synq/features/message/domain/usecases/get_newer_messages_use_case.dart';
 import 'package:synq/features/message/domain/usecases/get_older_messages_use_case.dart';
 import 'package:synq/features/message/domain/usecases/send_message_use_case.dart';
+import 'package:synq/features/message/domain/usecases/update_message_status_use_case.dart';
 import 'package:synq/features/message/domain/usecases/update_typing_status_use_case.dart';
 
 class MessageRepositoryImpl extends MessageRepository {
@@ -75,5 +76,10 @@ class MessageRepositoryImpl extends MessageRepository {
     GetNewerMessagesParams params,
   ) async {
     return await apiService.getNewerMessages(params);
+  }
+
+  @override
+  Future<void> updateMessageStatus(UpdateMessageStatusParams params) async {
+    await apiService.updateMessageStatus(params);
   }
 }

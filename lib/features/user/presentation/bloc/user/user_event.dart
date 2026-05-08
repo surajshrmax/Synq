@@ -6,4 +6,8 @@ class GetUserInfoEvent extends UserEvent {
   GetUserInfoEvent({required this.userId});
 }
 
-class GetFriends extends UserEvent {}
+class GetFriends extends UserEvent {
+  final String? keyword;
+
+  GetFriends({required this.keyword});
+}

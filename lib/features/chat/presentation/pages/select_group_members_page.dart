@@ -24,10 +24,11 @@ class SelectGroupMembersPage extends StatefulWidget {
 }
 
 class _SelectGroupMembersPageState extends State<SelectGroupMembersPage> {
+  final searchController = TextEditingController();
   List<Member> members = [];
   @override
   void initState() {
-    context.read<UserBloc>().add(GetFriends());
+    context.read<UserBloc>().add(GetFriends(keyword: null));
     super.initState();
   }
 
@@ -92,11 +93,13 @@ class _SelectGroupMembersPageState extends State<SelectGroupMembersPage> {
 
                     SynqAnimatedContainer(
                       child: TextField(
+                        controller: searchController,
                         decoration: InputDecoration(
                           contentPadding: EdgeInsets.symmetric(horizontal: 10),
                           border: InputBorder.none,
                           hintText: "Search",
                         ),
+                        onChanged: (value) => context.read<UserBloc>().add(GetFriends(keyword: searchController.text)),
                       ),
                     ),
                   ],

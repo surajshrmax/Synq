@@ -15,6 +15,7 @@ import 'package:synq/features/chat/data/repository/conversation_repository_impl.
 import 'package:synq/features/chat/domain/repository/conversation_repository.dart';
 import 'package:synq/features/chat/domain/usecases/create_group_use_case.dart';
 import 'package:synq/features/chat/domain/usecases/get_all_conversation_use_case.dart';
+import 'package:synq/features/chat/domain/usecases/get_group_info_use_case.dart';
 import 'package:synq/features/chat/presentation/bloc/chat/chat_bloc.dart';
 import 'package:synq/features/chat/presentation/bloc/group/group_bloc.dart';
 import 'package:synq/features/message/data/connection/message_connection.dart';
@@ -27,6 +28,7 @@ import 'package:synq/features/message/domain/usecases/get_messages_around_messag
 import 'package:synq/features/message/domain/usecases/get_newer_messages_use_case.dart';
 import 'package:synq/features/message/domain/usecases/get_older_messages_use_case.dart';
 import 'package:synq/features/message/domain/usecases/send_message_use_case.dart';
+import 'package:synq/features/message/domain/usecases/update_message_status_use_case.dart';
 import 'package:synq/features/message/domain/usecases/update_message_use_case.dart';
 import 'package:synq/features/message/domain/usecases/update_typing_status_use_case.dart';
 import 'package:synq/features/message/presentation/bloc/chat-session/chat_session_cubit.dart';
@@ -118,9 +120,19 @@ void setUpDI() {
     ),
   );
 
-  getIt.registerLazySingleton<CreateGroupUseCase>(() => CreateGroupUseCase(repository: getIt<ConversationRepository>()),);
+  getIt.registerLazySingleton<CreateGroupUseCase>(
+    () => CreateGroupUseCase(repository: getIt<ConversationRepository>()),
+  );
+  getIt.registerLazySingleton<GetGroupInfoUseCase>(
+    () => GetGroupInfoUseCase(repository: getIt<ConversationRepository>()),
+  );
 
-  getIt.registerFactory<GroupBloc>(() => GroupBloc(createGroupUseCase: getIt<CreateGroupUseCase>()),);
+  getIt.registerFactory<GroupBloc>(
+    () => GroupBloc(
+      createGroupUseCase: getIt<CreateGroupUseCase>(),
+      groupInfoUseCase: getIt<GetGroupInfoUseCase>(),
+    ),
+  );
 
   getIt.registerFactory<ChatBloc>(
     () => ChatBloc(useCase: getIt<GetAllConversationUseCase>()),
@@ -170,6 +182,10 @@ void setUpDI() {
     () => UpdateMessageUseCase(messageRepository: getIt<MessageRepository>()),
   );
 
+  getIt.registerLazySingleton<UpdateMessageStatusUseCase>(
+    () => UpdateMessageStatusUseCase(repository: getIt<MessageRepository>()),
+  );
+
   getIt.registerFactory<ChatSessionCubit>(() => ChatSessionCubit());
 
   getIt.registerFactory<MessageBloc>(
@@ -178,6 +194,7 @@ void setUpDI() {
       sendMessageUseCase: getIt<SendMessageUseCase>(),
       deleteMessageUseCase: getIt<DeleteMessageUseCase>(),
       updateMessageUseCase: getIt<UpdateMessageUseCase>(),
+      updateMessageStatusUseCase: getIt<UpdateMessageStatusUseCase>(),
       initialMessagesUseCase: getIt<GetInitialMessagesUseCase>(),
       olderMessagesUseCase: getIt<GetOlderMessagesUseCase>(),
       messagesAroundMessageUseCase: getIt<GetMessagesAroundMessageUseCase>(),

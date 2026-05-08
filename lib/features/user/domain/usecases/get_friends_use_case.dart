@@ -7,7 +7,7 @@ class GetFriendsUseCase {
 
   GetFriendsUseCase({required this.userRepository});
 
-  Future<ApiResult<FriendsResponse>> call() async {
-    return await userRepository.getFriends();
+  Future<ApiResult<FriendsResponse>> call(String? keyword) async {
+    return await userRepository.getFriends(keyword);
   }
 }

@@ -106,7 +106,7 @@ class SearchUserPage extends StatelessWidget {
                         return UserListItem(
                           user: user,
                           onPressed: () {
-                            context.push("/message/null/${user.id}");
+                            context.push("/message/null/false/${user.id}");
                           },
                         );
                       },

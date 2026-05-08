@@ -8,6 +8,9 @@ import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/config/theme/app_theme.dart';
 import 'package:synq/core/widgets/synq_alert_dialog.dart';
 import 'package:synq/core/widgets/synq_bottom_sheet_dialog.dart';
+import 'package:synq/features/chat/presentation/bloc/group/group_bloc.dart';
+import 'package:synq/features/chat/presentation/bloc/group/group_event.dart';
+import 'package:synq/features/chat/presentation/bloc/group/group_state.dart';
 import 'package:synq/features/message/presentation/bloc/chat-session/chat_session_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/fab/fab_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_bloc.dart';
@@ -16,8 +19,10 @@ import 'package:synq/features/message/presentation/bloc/message-box/message_box_
 import 'package:synq/features/message/presentation/bloc/message-box/message_box_cubit_state.dart';
 import 'package:synq/features/message/presentation/bloc/typing/typing_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/typing/typing_cubit_state.dart';
+import 'package:synq/features/message/presentation/widgets/group_chat_header.dart';
 import 'package:synq/features/message/presentation/widgets/message_box.dart';
 import 'package:synq/features/message/presentation/widgets/message_list.dart';
+import 'package:synq/features/message/presentation/widgets/normal_chat_header.dart';
 import 'package:synq/features/user/presentation/bloc/user/user_bloc.dart';
 import 'package:synq/features/user/presentation/bloc/user/user_event.dart';
 import 'package:synq/features/user/presentation/bloc/user/user_state.dart';
@@ -25,9 +30,15 @@ import 'package:synq/system_bars_wrapper.dart';
 
 class MessagePage extends StatefulWidget {
   final String chatId;
+  final bool isGroup;
   final String userId;
 
-  const MessagePage({super.key, required this.chatId, required this.userId});
+  const MessagePage({
+    super.key,
+    required this.chatId,
+    required this.isGroup,
+    required this.userId,
+  });
 
   @override
   State<MessagePage> createState() => _MessagePageState();
@@ -51,9 +62,13 @@ class _MessagePageState extends State<MessagePage> {
   void initState() {
     messageBloc = context.read<MessageBloc>();
     if (!widget.chatId.contains("null")) {
-      context.read<ChatSessionCubit>().updateChatSession(chatId: widget.chatId);
+      context.read<ChatSessionCubit>().updateChatSession(chatId: widget.chatId, messages: []);
     }
-    context.read<UserBloc>().add(GetUserInfoEvent(userId: widget.userId));
+    if (!widget.isGroup) {
+      context.read<UserBloc>().add(GetUserInfoEvent(userId: widget.userId));
+    }else{
+      context.read<GroupBloc>().add(GetGroupInfo(groupId: widget.chatId));
+    }
     context.read<MessageBloc>().add(
       LoadInitialMessages(
         chatId: widget.chatId.contains("null") ? widget.userId : widget.chatId,
@@ -183,13 +198,17 @@ class _MessagePageState extends State<MessagePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: mediaQuery.padding.top),
-            _buildHeader(context),
+            // _buildHeader(context, widget.isGroup),
+            switch(widget.isGroup){
+              true => GroupChatHeader(groupId: widget.chatId),
+              false => NormalChatHeader(userId: widget.userId,),
+            },
             Expanded(
               child: MessageList(
                 autoScrollController: messageScrollController,
                 onItemPressed: (message) {
                   messageBoxFocusNode.unfocus();
-                  showMessageOptions(context, message.id, message.content);
+                  showMessageOptions(context, message.serverId, message.content);
                 },
               ),
             ),
@@ -233,85 +252,6 @@ class _MessagePageState extends State<MessagePage> {
       ),
     );
   }
-}
-
-Widget _buildHeader(BuildContext context) {
-  final theme = Theme.of(context);
-  final textTheme = theme.extension<AppTextColors>();
-  return Padding(
-    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      spacing: 40,
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(vertical: 3, horizontal: 6),
-          decoration: BoxDecoration(
-            color: primaryColor,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: GestureDetector(
-            onTap: () => context.pop(),
-            child: Row(
-              children: [
-                // Icon(Icons.chevron_left, size: 16, color: Colors.white),
-                HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, size: 16),
-                Text(
-                  "Back",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        Row(
-          spacing: 10,
-          children: [
-            BlocBuilder<UserBloc, UserState>(
-              builder: (context, state) {
-                return state is UserStateInfoLoaded
-                    ? Text(
-                        state.user.profile!.name!,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 17,
-                        ),
-                      )
-                    : SizedBox();
-              },
-            ),
-            Text("/", style: TextStyle(fontSize: 25)),
-            Row(
-              spacing: 5,
-              children: [
-                HugeIcon(
-                  icon: HugeIcons.strokeRoundedTime02,
-                  color: textTheme?.secondaryTextColor,
-                  size: 14,
-                ),
-                Text(
-                  "1 hr",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: textTheme?.secondaryTextColor,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        HugeIcon(
-          icon: HugeIcons.strokeRoundedMoreVertical,
-          size: 28,
-          strokeWidth: 2,
-        ),
-      ],
-    ),
-  );
 }
 
 void showMessageOptions(BuildContext context, String id, String content) {

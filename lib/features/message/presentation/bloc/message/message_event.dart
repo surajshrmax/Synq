@@ -38,11 +38,24 @@ class SendMessage extends MessageEvent {
   });
 }
 
+class SentMessageUpdated extends MessageEvent {
+  final MessageModel message;
+
+  SentMessageUpdated({required this.message});
+}
+
 class UpdateMessage extends MessageEvent {
   final String id;
   final String content;
 
   UpdateMessage({required this.id, required this.content});
+}
+
+class UpdateMessageStatus extends MessageEvent {
+  final String messageId;
+  final String status;
+
+  UpdateMessageStatus({required this.messageId, required this.status});
 }
 
 class DeleteMessage extends MessageEvent {

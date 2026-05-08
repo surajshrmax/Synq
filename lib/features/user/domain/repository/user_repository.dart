@@ -5,5 +5,5 @@ import 'package:synq/features/user/data/models/friends_response.dart';
 abstract class UserRepository {
   Future<ApiResult<UserModel>> getUserInfo(String userId);
   Future<ApiResult<Iterable<UserModel>>> searchUser(String name);
-  Future<ApiResult<FriendsResponse>> getFriends();
+  Future<ApiResult<FriendsResponse>> getFriends(String? keyword);
 }

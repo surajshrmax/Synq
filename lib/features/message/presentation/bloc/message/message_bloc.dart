@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synq/core/di/service_locator.dart';
 import 'package:synq/core/storage/secure_storage.dart';
+import 'package:synq/features/auth/data/models/user_model.dart';
+import 'package:synq/features/auth/data/models/user_profile.dart';
 import 'package:synq/features/message/data/connection/message_connection.dart';
+import 'package:synq/features/message/data/models/message_model.dart';
 import 'package:synq/features/message/domain/usecases/delete_message_use_case.dart';
 import 'package:synq/features/message/domain/usecases/get_initial_messages_use_case.dart';
 import 'package:synq/features/message/domain/usecases/get_messages_around_message_use_case.dart';
@@ -51,6 +54,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     on<SendMessage>(_onSendMessageEvent);
     on<UpdateMessage>(_onUpdateMessage);
     on<DeleteMessage>(_onDeleteMessage);
+    on<SentMessageUpdated>(_onSentMessageUpdatedEvent);
 
     on<NewMessageRecieved>(_onNewMessageEvent);
     on<MessageEditedEvent>(_onMessageEditedEvent);
@@ -74,6 +78,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
           chatId: data.chatId,
           hasMoreBefore: data.hasMoreBefore,
           beforeCursor: data.beforeCursor,
+          messages: data.messages,
         );
         emit(
           MessageLoaded(
@@ -105,6 +110,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
         chatSession.updateChatSession(
           beforeCursor: data.beforeCursor,
           hasMoreBefore: data.hasMoreBefore,
+          messages: chatSession.state.messages..addAll(data.messages),
         );
         emit(
           MessageLoaded(
@@ -138,6 +144,9 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
           hasMoreBefore: data.hasMoreBefore,
           afterCursor: data.afterCursor,
           hasMoreAfter: data.hasMoreAfter,
+          messages: chatSession.state.messages
+            ..clear()
+            ..addAll(data.messages),
         );
         emit(
           MessageLoaded(
@@ -169,6 +178,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
         chatSession.updateChatSession(
           hasMoreAfter: data.hasMoreAfter,
           afterCursor: data.afterCursor,
+          messages: chatSession.state.messages..addAll(data.messages),
         );
         emit(
           MessageLoaded(
@@ -187,15 +197,58 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     SendMessage event,
     Emitter<MessageState> emit,
   ) async {
+    final String localId = DateTime.now().millisecondsSinceEpoch.toString();
+    chatSession.state.messages.add(
+      MessageModel(
+        serverId: "id",
+        localId: localId,
+        content: event.content,
+        isEdited: false,
+        replyMessageId: event.replyToMessageId,
+        reply: event.replyToMessageId == null
+            ? null
+            : chatSession.state.messages
+                  .where((m) => m.serverId == event.replyToMessageId)
+                  .map(
+                    (m) => ReplyMessage(
+                      id: m.serverId,
+                      content: m.content,
+                      serverTime: m.serverTime!,
+                      sentAt: m.sendAt!,
+                    ),
+                  )
+                  .first,
+        sender: UserModel(
+          id: "id",
+          userName: "",
+          profile: UserProfile(
+            name: "Exception",
+            imageUrl: "",
+            bio: "",
+            lastSeen: DateTime.now(),
+          ),
+        ),
+        senderId: "",
+        serverTime: "",
+        status: "sending",
+        sendAt: DateTime.now(),
+      ),
+    );
     emit(MessageSending());
+    emit(MessageRecieved(message: chatSession.state.messages.last));
     await sendMessageUseCase.call(
       SendMessageParams(
         id: event.id,
         isChat: event.isChat,
+        localId: localId,
         content: event.content,
         replyToMessageId: event.replyToMessageId,
       ),
     );
+  }
+
+  Future<void> _onSentMessageUpdatedEvent(SentMessageUpdated event, Emitter<MessageState> emit) async{
+    emit(SentMessageUpdates(message: event.message));
   }
 
   Future<void> _onNewMessageEvent(
@@ -251,6 +304,10 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   }
 
   void _addAllListener() {
+    subs.add(messageConnection.sentMessages.listen((event){
+      add(SentMessageUpdated(message: event));
+    }));
+
     subs.add(
       messageConnection.messages.listen((event) {
         add(NewMessageRecieved(message: event));
@@ -259,7 +316,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
 
     subs.add(
       messageConnection.updates.listen(
-        (event) => add(MessageEditedEvent(id: event.id, message: event)),
+        (event) => add(MessageEditedEvent(id: event.serverId, message: event)),
       ),
     );
 

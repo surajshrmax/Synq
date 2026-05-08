@@ -15,12 +15,32 @@ class ChatListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.extension<AppTextColors>();
+
+    String getTime(DateTime? time) {
+      if (time == null){
+        return "";
+      }
+      var currentTime = DateTime.now();
+      if (time.year == currentTime.year &&
+          time.month == currentTime.month &&
+          time.day == currentTime.day) {
+        return "${time.hour}:${time.minute}";
+      } else if (time.year == currentTime.year &&
+          time.month == currentTime.month &&
+          currentTime.day - time.day == 1) {
+        return "Yesterday";
+      } else {
+        return "${time.day}/${time.month}/${time.year} at ${time.hour}:${time.minute}";
+      }
+    }
+
     return SynqContainer(
       onPressed: () => onPressed!(),
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       padding: EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       borderColor: theme.scaffoldBackgroundColor,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 10.r,
         children: [
           ProfileImage(
@@ -61,9 +81,9 @@ class ChatListItem extends StatelessWidget {
                     ),
 
                     Text(
-                      chat.lastMessage?.sendAt.toString() ?? '',
+                      getTime(chat.lastMessage?.sendAt?.toLocal()),
                       style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: 10.sp,
                         color: textTheme?.secondaryTextColor,
                       ),
                     ),
@@ -72,29 +92,55 @@ class ChatListItem extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        chat.lastMessage?.content ?? '',
-                        style: TextStyle(color: textTheme?.secondaryTextColor),
-                      ),
+                      child: chat.isGroup
+                          ? RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: chat.lastMessage == null? "" : chat.lastMessage!.sender!.profile!.name,
+                                        // chat.lastMessage?.sender?.profile?.name ?? "",
+                                    style: TextStyle(
+                                      color: textTheme?.primaryTextColor,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: chat.lastMessage?.content ?? "NO CONVERSATION FOUND",
+                                    style: TextStyle(
+                                      color: textTheme?.secondaryTextColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Text(
+                              chat.lastMessage?.content ?? "NO CONVERSATION FOUND!!!" ,
+                              style: TextStyle(
+                                color: textTheme?.secondaryTextColor,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                     ),
 
-                    chat.isGroup != null
-                        ? SynqContainer(
-                            height: 25.h,
-                            width: 25.h,
-                            backgroundColor: Colors.lightGreenAccent,
-                            child: Center(
-                              child: FittedBox(
-                                child: Text(
-                                  maxLines: 1,
-                                  '1',
-                                  // unreads.toString(),
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              ),
+                    Visibility(
+                      visible: true,
+                      child: SynqContainer(
+                        height: 25.h,
+                        width: 25.h,
+                        backgroundColor: Colors.lightGreenAccent,
+                        child: Center(
+                          child: FittedBox(
+                            child: Text(
+                              maxLines: 1,
+                              '1',
+                              // unreads.toString(),
+                              style: TextStyle(color: Colors.black),
                             ),
-                          )
-                        : Container(),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],

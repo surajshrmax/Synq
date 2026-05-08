@@ -32,9 +32,15 @@ class UserApiService {
     );
   }
 
-  Future<ApiResult<FriendsResponse>> getFriends() async {
+  Future<ApiResult<FriendsResponse>> getFriends(String? keyword) async {
+    var query;
+    if(keyword == null){
+      query = "/users/friends";
+    }else{
+      query = "/users/friends?keyword=${keyword}";
+    }
     var response = await client.get<FriendsResponse>(
-      "/users/friends",
+      query,
       mapper: (json) => FriendsResponse.fromJson(json),
     );
 

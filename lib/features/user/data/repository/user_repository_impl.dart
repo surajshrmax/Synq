@@ -20,7 +20,7 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<ApiResult<FriendsResponse>> getFriends() async {
-    return await apiService.getFriends();
+  Future<ApiResult<FriendsResponse>> getFriends(String? keyword) async {
+    return await apiService.getFriends(keyword);
   }
 }

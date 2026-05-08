@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:synq/config/constants.dart';
 import 'package:synq/core/widgets/synq_container.dart';
+import 'package:synq/system_bars_wrapper.dart';
 
 class SynqBottomSheetDialog {
   static void showErrorDialog(BuildContext context, String message) {
@@ -69,19 +70,22 @@ class SynqBottomSheetDialog {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return SynqContainer(
-          width: double.infinity,
-          margin: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
-          padding: EdgeInsets.all(15),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(title, style: TextStyle(fontStyle: FontStyle.italic)),
-              if (items != null)
-                for (var item in items) _buildItemWidget(item),
-            ],
+        return SystemBarsWrapper(
+          statusBarColor: Colors.transparent,
+          child: SynqContainer(
+            width: double.infinity,
+            margin: EdgeInsets.only(
+              bottom: MediaQuery.of(context).padding.bottom,
+            ),
+            padding: EdgeInsets.all(15),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(title, style: TextStyle(fontStyle: FontStyle.italic)),
+                if (items != null)
+                  for (var item in items) _buildItemWidget(item),
+              ],
+            ),
           ),
         );
       },

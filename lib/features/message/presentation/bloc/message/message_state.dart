@@ -22,6 +22,12 @@ class MessageLoaded extends MessageState {
   });
 }
 
+class SentMessageUpdates extends MessageState {
+  final MessageModel message;
+
+  SentMessageUpdates({required this.message});
+}
+
 class MessageRecieved extends MessageState {
   final MessageModel message;
 

@@ -35,7 +35,7 @@ class _ChatPageState extends State<ChatPage> {
     return SystemBarsWrapper(
       child: Scaffold(
         floatingActionButton: Padding(
-          padding: EdgeInsets.only(bottom: mediaQuery.padding.bottom + 30),
+          padding: EdgeInsets.only(bottom: mediaQuery.padding.bottom),
           child: FloatingActionButton(
             onPressed: () {
               context.push("/create_group");
@@ -50,23 +50,25 @@ class _ChatPageState extends State<ChatPage> {
 
             BlocBuilder<ChatBloc, ChatState>(
               builder: (context, state) {
-                return state is ChatStateLoaded
-                    ? SliverList.builder(
-                        itemCount: state.conversations.length,
-                        itemBuilder: (context, index) {
-                          var chat = state.conversations[index];
-                          var user = chat.user;
-                          var lastMessage = chat.lastMessage;
-                          return ChatListItem(
-                            onPressed: () =>
-                                context.push("/message/${chat.id}/${user?.id}"),
-                            chat: chat,
-                          );
-                        },
-                      )
-                    : SliverFillRemaining(
-                        child: Center(child: Text("No Conversation Found")),
+                return switch (state) {
+                  ChatStateLoading() => SliverFillRemaining(
+                    child: Center(child: Text("Loading Chats...")),
+                  ),
+                  ChatStateLoaded() => SliverList.builder(
+                    itemCount: state.conversations.length,
+                    itemBuilder: (context, index) {
+                      var chat = state.conversations[index];
+                      var user = chat.user;
+                      return ChatListItem(
+                        onPressed: () => context.push(
+                          "/message/${chat.id}/${chat.isGroup}/${user?.id}",
+                        ),
+                        chat: chat,
                       );
+                    },
+                  ),
+                  (_) => SliverFillRemaining(child: Text("No Conversation Found")),
+                };
               },
             ),
           ],

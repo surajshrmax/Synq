@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:synq/config/theme/app_text_colors.dart';
 import 'package:synq/features/message/data/models/message_model.dart';
-import 'package:synq/features/message/presentation/bloc/fab/fab_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_bloc.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_event.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_state.dart';
@@ -114,14 +113,16 @@ class _MessageListState extends State<MessageList> {
       _messages.clear();
       _ids.clear();
       for (var item in messages) {
-        _ids.add(item.id);
+        _ids.add(item.serverId);
       }
       setState(() {
         if (type == LoadedMessagesType.around) {
           _messages.addAll(messages.reversed);
 
           if (scrollToMessageId != null) {
-            int index = _messages.indexWhere((m) => m.id == scrollToMessageId!);
+            int index = _messages.indexWhere(
+              (m) => m.serverId == scrollToMessageId!,
+            );
             if (index != -1) {
               scrollController.scrollToIndex(
                 index,
@@ -145,9 +146,9 @@ class _MessageListState extends State<MessageList> {
   }
 
   void insertMessage(MessageModel message) {
-    if (_ids.contains(message.id)) return;
+    if (_ids.contains(message.serverId)) return;
 
-    _ids.add(message.id);
+    _ids.add(message.serverId);
 
     int index = _messages.indexWhere(
       (item) => item.sendAt!.isBefore(message.sendAt!),
@@ -160,14 +161,45 @@ class _MessageListState extends State<MessageList> {
     }
   }
 
+  void onSentMessageUpdates(MessageModel message) {
+    int index = _messages.indexWhere((m) => m.localId == message.localId);
+    var oldMessage = _messages[index];
+    _messages[index] = MessageModel(
+      serverId: message.serverId,
+      localId: message.localId,
+      content: oldMessage.content,
+      isEdited: oldMessage.isEdited,
+      replyMessageId: oldMessage.replyMessageId,
+      reply: oldMessage.reply,
+      sender: oldMessage.sender,
+      senderId: oldMessage.senderId,
+      serverTime: message.serverTime,
+      status: message.status,
+      sendAt: message.sendAt,
+    );
+  }
+
   void updateMessage(String id, MessageModel message) {
-    int index = _messages.indexWhere((m) => m.id == id);
-    _messages[index] = message;
+    int index = _messages.indexWhere((m) => m.serverId == id);
+    var oldMessage = _messages[index];
+    _messages[index] = MessageModel(
+      serverId: message.serverId,
+      localId: "",
+      content: message.content.isNotEmpty ? message.content : oldMessage.content,
+      isEdited: message.isEdited,
+      replyMessageId: oldMessage.replyMessageId,
+      reply: oldMessage.reply,
+      sender: oldMessage.sender,
+      senderId: oldMessage.senderId,
+      serverTime: oldMessage.serverTime,
+      status: message.status,
+      sendAt: oldMessage.sendAt,
+    );
   }
 
   void removeMessage(String id) {
     _ids.remove(id);
-    int index = _messages.indexWhere((m) => m.id == id);
+    int index = _messages.indexWhere((m) => m.serverId == id);
     _messages.removeAt(index);
   }
 
@@ -189,11 +221,13 @@ class _MessageListState extends State<MessageList> {
       listenWhen: (previous, current) =>
           current is MessageLoaded ||
           current is MessageRecieved ||
+          current is SentMessageUpdates ||
           current is MessageUpdated ||
           current is MessageRemoved,
       listener: (context, state) {
         return switch (state) {
           MessageLoaded() => addMessages(state),
+          SentMessageUpdates() => onSentMessageUpdates(state.message),
           MessageRecieved() => _messages.insert(0, state.message),
           MessageUpdated() => updateMessage(state.id, state.message),
           MessageRemoved() => removeMessage(state.id),
@@ -205,6 +239,7 @@ class _MessageListState extends State<MessageList> {
             current is MessageLoading ||
             current is MessageLoaded &&
                 current.type == LoadedMessagesType.initial ||
+            current is SentMessageUpdates ||
             current is MessageRecieved ||
             current is MessageUpdated ||
             current is MessageRemoved ||
@@ -214,6 +249,7 @@ class _MessageListState extends State<MessageList> {
             return _buildLoading(textTheme);
           }
           if (state is MessageLoaded ||
+              state is SentMessageUpdates ||
               state is MessageRecieved ||
               state is MessageUpdated ||
               state is MessageRemoved) {
@@ -237,13 +273,13 @@ class _MessageListState extends State<MessageList> {
       itemBuilder: (context, index) {
         final message = _messages[index];
         return AutoScrollTag(
-          key: ValueKey(message.id),
+          key: ValueKey(message.serverId),
           controller: scrollController,
           index: index,
           child: MessageListItem(
             onPressed: () => {widget.onItemPressed(_messages[index])},
             onReplyClicked: (id, sentAt) {
-              int index = _messages.indexWhere((m) => m.id == id);
+              int index = _messages.indexWhere((m) => m.serverId == id);
               if (index == -1) {
                 scrollToMessageId = id;
                 context.read<MessageBloc>().add(
@@ -260,7 +296,7 @@ class _MessageListState extends State<MessageList> {
             message: _messages[index],
             onDrag: (_) async {
               context.read<MessageBoxCubit>().addReply(
-                message.id,
+                message.serverId,
                 message.content,
               );
               return false;

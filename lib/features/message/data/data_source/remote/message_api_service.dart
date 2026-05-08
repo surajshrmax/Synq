@@ -6,6 +6,7 @@ import 'package:synq/features/message/domain/usecases/get_messages_around_messag
 import 'package:synq/features/message/domain/usecases/get_newer_messages_use_case.dart';
 import 'package:synq/features/message/domain/usecases/get_older_messages_use_case.dart';
 import 'package:synq/features/message/domain/usecases/send_message_use_case.dart';
+import 'package:synq/features/message/domain/usecases/update_message_status_use_case.dart';
 import 'package:synq/features/message/domain/usecases/update_typing_status_use_case.dart';
 
 class MessageApiService {
@@ -19,6 +20,7 @@ class MessageApiService {
       data: {
         "id": params.id,
         "isChat": params.isChat,
+        "localId": params.localId,
         "content": params.content,
         "replyToMessageId": params.replyToMessageId,
       },
@@ -113,6 +115,13 @@ class MessageApiService {
     return response.when(
       success: (data) => ApiSuccess(data: data),
       failure: (error) => ApiFailure(error: error),
+    );
+  }
+
+  Future<void> updateMessageStatus(UpdateMessageStatusParams params) async {
+    await apiClient.post(
+      "/messages/status",
+      data: {"messageId": params.messageId, "status": params.status},
     );
   }
 }

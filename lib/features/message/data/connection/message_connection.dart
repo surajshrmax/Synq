@@ -14,6 +14,9 @@ class MessageConnection {
       StreamController.broadcast();
   Stream<MessageModel> get messages => _newMessageController.stream;
 
+  final StreamController<MessageModel> _sentMessageConroller = StreamController.broadcast();
+  Stream<MessageModel> get sentMessages => _sentMessageConroller.stream;
+
   final StreamController<String> _deleteMessageController =
       StreamController.broadcast();
   Stream<String> get deletes => _deleteMessageController.stream;
@@ -49,6 +52,14 @@ class MessageConnection {
         final Map<String, dynamic> raw = args[0] as Map<String, dynamic>;
         final message = MessageModel.fromJson(raw);
         _newMessageController.add(message);
+      }
+    });
+
+    hubConnection.on("MessageSent", (args) {
+      if (args != null && args.isNotEmpty) {
+        final Map<String, dynamic> raw = args[0] as Map<String, dynamic>;
+        final message = MessageModel.fromJson(raw);
+        _sentMessageConroller.add(message);
       }
     });
 

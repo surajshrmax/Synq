@@ -31,7 +31,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   Future<void> _onGetFriends(GetFriends event, Emitter<UserState> emit) async {
-    var response = await friendsUseCase.call();
+    var response = await friendsUseCase.call(event.keyword);
 
     response.when(
       success: (data) {

@@ -1,6 +1,7 @@
 import 'package:synq/core/network/api_client.dart';
 import 'package:synq/core/network/api_result.dart';
 import 'package:synq/features/chat/data/models/chat_model.dart';
+import 'package:synq/features/chat/data/models/group_model.dart';
 
 class ConversationApiService {
   final ApiClient apiClient;
@@ -21,12 +22,26 @@ class ConversationApiService {
   }
 
   Future<ApiResult> createGroup(String name, List<String> members) async {
-    var response = await apiClient.post("/chats", data: {
-      "name": name,
-      "imageUrl": "",
-      "members": members
-    });
+    var response = await apiClient.post(
+      "/chats",
+      data: {"name": name, "imageUrl": "", "members": members},
+    );
 
-    return response.when(success: (data) => ApiSuccess(data: data), failure: (error) => ApiFailure(error: error),);
+    return response.when(
+      success: (data) => ApiSuccess(data: data),
+      failure: (error) => ApiFailure(error: error),
+    );
+  }
+
+  Future<ApiResult<GroupModel>> getGroupInfo(String groupId) async {
+    var response = await apiClient.get(
+      "/chats/group?id=$groupId",
+      mapper: (json) => GroupModel.fromJson(json),
+    );
+
+    return response.when(
+      success: (data) => ApiSuccess(data: data),
+      failure: (error) => ApiFailure(error: error),
+    );
   }
 }

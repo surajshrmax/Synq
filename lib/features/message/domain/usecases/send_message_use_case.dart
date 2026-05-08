@@ -13,12 +13,14 @@ class SendMessageUseCase {
 class SendMessageParams {
   final String id;
   final bool isChat;
+  final String localId;
   final String content;
   final String? replyToMessageId;
 
   SendMessageParams({
     required this.id,
     required this.isChat,
+    required this.localId,
     required this.content,
     this.replyToMessageId,
   });

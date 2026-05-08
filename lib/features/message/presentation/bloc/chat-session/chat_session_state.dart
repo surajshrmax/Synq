@@ -1,9 +1,12 @@
+import 'package:synq/features/message/data/models/message_model.dart';
+
 class ChatSessionState {
   final String? chatId;
   final bool hasMoreAfter;
   final bool hasMoreBefore;
   final String? beforeCursor;
   final String? afterCursor;
+  final List<MessageModel> messages;
 
   const ChatSessionState({
     required this.chatId,
@@ -11,6 +14,7 @@ class ChatSessionState {
     this.hasMoreBefore = false,
     this.beforeCursor,
     this.afterCursor,
+    required this.messages,
   });
 
   ChatSessionState copyWith({
@@ -19,6 +23,7 @@ class ChatSessionState {
     bool? hasMoreAfter,
     String? beforeCursor,
     String? afterCursor,
+    required List<MessageModel> messages,
   }) {
     return ChatSessionState(
       chatId: chatId,
@@ -26,6 +31,7 @@ class ChatSessionState {
       hasMoreAfter: hasMoreAfter ?? this.hasMoreAfter,
       beforeCursor: beforeCursor,
       afterCursor: afterCursor,
+      messages: messages,
     );
   }
 }

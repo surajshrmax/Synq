@@ -9,3 +9,9 @@ class CreateGroupEvent extends GroupEvent {
     required this.members,
   });
 }
+
+class GetGroupInfo extends GroupEvent {
+  final String groupId;
+
+  GetGroupInfo({required this.groupId});
+}

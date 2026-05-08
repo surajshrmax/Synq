@@ -21,11 +21,16 @@ final routes = GoRouter(
     GoRoute(path: "/home", builder: (context, state) => ChatPage()),
     GoRoute(path: "/search", builder: (context, state) => SearchUserPage()),
     GoRoute(
-      path: "/message/:conversationId/:userId",
+      path: "/message/:conversationId/:isGroup/:userId",
       builder: (context, state) {
         final conversationId = state.pathParameters['conversationId'];
         final userID = state.pathParameters['userId'];
-        return MessagePage(chatId: conversationId!, userId: userID!);
+        final isGroup = bool.parse(state.pathParameters['isGroup']!);
+        return MessagePage(
+          chatId: conversationId!,
+          isGroup: isGroup,
+          userId: userID!,
+        );
       },
     ),
     GoRoute(
