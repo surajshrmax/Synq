@@ -13,6 +13,7 @@ import 'package:synq/features/message/domain/usecases/get_messages_around_messag
 import 'package:synq/features/message/domain/usecases/get_newer_messages_use_case.dart';
 import 'package:synq/features/message/domain/usecases/get_older_messages_use_case.dart';
 import 'package:synq/features/message/domain/usecases/send_message_use_case.dart';
+import 'package:synq/features/message/domain/usecases/update_message_status_use_case.dart';
 import 'package:synq/features/message/domain/usecases/update_message_use_case.dart';
 import 'package:synq/features/message/presentation/bloc/chat-session/chat_session_cubit.dart';
 import 'package:synq/features/message/presentation/bloc/message/message_event.dart';
@@ -22,6 +23,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   final SendMessageUseCase sendMessageUseCase;
   final DeleteMessageUseCase deleteMessageUseCase;
   final UpdateMessageUseCase updateMessageUseCase;
+  final UpdateMessageStatusUseCase updateMessageStatusUseCase;
 
   final GetInitialMessagesUseCase initialMessagesUseCase;
   final GetOlderMessagesUseCase olderMessagesUseCase;
@@ -37,6 +39,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     required this.sendMessageUseCase,
     required this.deleteMessageUseCase,
     required this.updateMessageUseCase,
+    required this.updateMessageStatusUseCase,
     required this.initialMessagesUseCase,
     required this.olderMessagesUseCase,
     required this.messagesAroundMessageUseCase,
@@ -53,6 +56,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
 
     on<SendMessage>(_onSendMessageEvent);
     on<UpdateMessage>(_onUpdateMessage);
+    on<UpdateMessageStatus>(_onUpdateMessageStatus);
     on<DeleteMessage>(_onDeleteMessage);
     on<SentMessageUpdated>(_onSentMessageUpdatedEvent);
 
@@ -88,6 +92,8 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
             hasMoreAfter: data.hasMoreAfter,
           ),
         );
+
+        
       },
       failure: (error) => emit(MessageError(error: error.message)),
     );
@@ -263,6 +269,10 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     Emitter<MessageState> emit,
   ) async {
     await updateMessageUseCase.call(event.id, event.content);
+  }
+
+  Future<void> _onUpdateMessageStatus(UpdateMessageStatus event, Emitter<MessageState> emit) async{
+    await updateMessageStatusUseCase.call(UpdateMessageStatusParams(messageId: event.messageId, status: event.status));
   }
 
   Future<void> _onMessageEditedEvent(
