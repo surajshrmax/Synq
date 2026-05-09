@@ -13,11 +13,13 @@ class CreateNewGroupPage extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final theme = Theme.of(context);
     final textTheme = theme.extension<AppTextColors>();
+
+    final groupNameController = TextEditingController();
     return SystemBarsWrapper(
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            context.push("/select_members/Dhoom");
+            context.push("/select_members/${groupNameController.text}");
           },
           shape: CircleBorder(),
 
@@ -47,7 +49,7 @@ class CreateNewGroupPage extends StatelessWidget {
 
               SizedBox(height: 30),
 
-              SynqTextField(hintText: "Group Name"),
+              SynqTextField(hintText: "Group Name", controller: groupNameController,),
             ],
           ),
         ),
